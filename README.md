@@ -1,2 +1,2 @@
-# Unchi UI
+# Unchi
 An Roblox ui library
