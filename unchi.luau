@@ -6,6 +6,21 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 
+local Theme = {
+	Accent = Color3.fromRGB(176, 79, 255),
+	WindowBackground = Color3.fromRGB(36, 36, 36),
+	WindowBorder = Color3.fromRGB(83, 83, 83),
+	TabBackground = Color3.fromRGB(42, 42, 42),
+	TabBorder = Color3.fromRGB(70, 70, 70),
+	TabBorderDark = Color3.fromRGB(58, 58, 58),
+	SectionBackground = Color3.fromRGB(48, 48, 48),
+	SectionBorder = Color3.fromRGB(63, 63, 63),
+	Text = Color3.fromRGB(240, 240, 240),
+	TextDark = Color3.fromRGB(144, 144, 144),
+	ElementBackground = Color3.fromRGB(48, 48, 48),
+	ElementBorder = Color3.fromRGB(88, 88, 88),
+}
+
 -- 変数
 local screenGui = Instance.new("ScreenGui")
 
@@ -97,8 +112,11 @@ end
 
 function UILibrary:Unload(): ()
 	ClearConnections()
+	
 	screenGui:Destroy()
 	screenGui = nil
+	
+	_windows = {}
 end
 
 function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typeof(Window)
@@ -113,7 +131,7 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 	
 	local root = Instance.new("Frame")
 	root.Parent = screenGui
-	root.BackgroundColor3 = Color3.fromRGB(36, 36, 36)
+	root.BackgroundColor3 = Theme.WindowBackground
 	root.BorderSizePixel = 0
 	root.AnchorPoint = Vector2.new(0.5, 0.5)
 	root.Position = UDim2.fromScale(0.5, 0.5)
@@ -135,7 +153,7 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 	local stroke = Instance.new("UIStroke")
 	stroke.Parent = outline
 	stroke.Enabled = true
-	stroke.Color = Color3.fromRGB(83, 83, 83)
+	stroke.Color = Theme.WindowBorder
 	stroke.Thickness = 1
 	stroke.LineJoinMode = Enum.LineJoinMode.Miter
 	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -148,7 +166,7 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 	title.Size = UDim2.new(1, -24, 0, 14)
 	title.Font = Enum.Font.Code
 	title.Text = name
-	title.TextColor3 = Color3.fromRGB(179, 87, 255)
+	title.TextColor3 = Theme.Accent
 	title.TextSize = 14
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.TextTruncate = Enum.TextTruncate.AtEnd
@@ -156,10 +174,10 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 	local tabSections = Instance.new("Frame")
 	tabSections.Parent = root
 	tabSections.AnchorPoint = Vector2.new(0.5, 1)
-	tabSections.BackgroundColor3 = Color3.fromRGB(42, 42, 42)
+	tabSections.BackgroundColor3 = Theme.TabBackground
 	tabSections.Position = UDim2.new(0.5, 0, 1, -10)
 	tabSections.Size = UDim2.new(1, -20, 1, -68)
-	tabSections.BorderColor3 = Color3.fromRGB(70, 70, 70)
+	tabSections.BorderColor3 = Theme.TabBorder
 	tabSections.BorderMode = Enum.BorderMode.Inset
 	tabSections.BorderSizePixel = 1
 
@@ -217,7 +235,7 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 		local picker = Instance.new("Frame")
 		picker.Parent = root
 		picker.AnchorPoint = Vector2.new(0.5, 0)
-		picker.BackgroundColor3 = Color3.fromRGB(36, 36, 36)
+		picker.BackgroundColor3 = Theme.WindowBackground
 		picker.BorderSizePixel = 0
 		picker.Position = UDim2.fromOffset(-4, 0)
 		picker.Size = UDim2.fromOffset(220, 220)
@@ -233,15 +251,14 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 		local uiStroke = Instance.new("UIStroke")
 		uiStroke.Parent = outline
 		uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-		uiStroke.Color = Color3.fromRGB(83, 83, 83)
+		uiStroke.Color = Theme.WindowBorder
 		uiStroke.LineJoinMode = Enum.LineJoinMode.Miter
 		uiStroke.Thickness = 1
 		
 		local svPanel = Instance.new("ImageButton")
 		svPanel.Parent = picker
 		svPanel.AutoButtonColor = false
-		svPanel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-		svPanel.BorderColor3 = Color3.fromRGB(70, 70, 70)
+		svPanel.BorderColor3 = Theme.TabBorder
 		svPanel.BorderSizePixel = 1
 		svPanel.BorderMode = Enum.BorderMode.Inset
 		svPanel.Position = UDim2.fromOffset(6, 6)
@@ -254,7 +271,7 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 		local huePanel = Instance.new("ImageButton")
 		huePanel.Parent = picker
 		huePanel.AutoButtonColor = false
-		huePanel.BorderColor3 = Color3.fromRGB(70, 70, 70)
+		huePanel.BorderColor3 = Theme.TabBorder
 		huePanel.BorderSizePixel = 1
 		huePanel.BorderMode = Enum.BorderMode.Inset
 		huePanel.Position = UDim2.fromOffset(192, 6)
@@ -274,8 +291,8 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 		local svHandle = Instance.new("Frame")
 		svHandle.Parent = svPanel
 		svHandle.AnchorPoint = Vector2.new(0.5, 0.5)
-		svHandle.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
-		svHandle.BorderColor3 = Color3.fromRGB(157, 157, 157)
+		svHandle.BackgroundColor3 = Theme.WindowBackground
+		svHandle.BorderColor3 = Theme.WindowBorder
 		svHandle.BorderMode = Enum.BorderMode.Inset
 		svHandle.BorderSizePixel = 1
 		svHandle.Position = UDim2.fromScale(0, 0)
@@ -284,8 +301,8 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 		local hueHandle = Instance.new("Frame")
 		hueHandle.Parent = huePanel
 		hueHandle.AnchorPoint = Vector2.new(0.5, 0.5)
-		hueHandle.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
-		hueHandle.BorderColor3 = Color3.fromRGB(157, 157, 157)
+		hueHandle.BackgroundColor3 = Theme.WindowBackground
+		hueHandle.BorderColor3 = Theme.WindowBorder
 		hueHandle.BorderMode = Enum.BorderMode.Inset
 		hueHandle.BorderSizePixel = 1
 		hueHandle.Position = UDim2.fromScale(0.5, 0)
@@ -294,15 +311,15 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 		local hexField = Instance.new("TextBox")
 		hexField.Parent = picker
 		hexField.AnchorPoint = Vector2.new(0.5, 1)
-		hexField.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
-		hexField.BorderColor3 = Color3.fromRGB(62, 62, 62)
+		hexField.BackgroundColor3 = Theme.TabBackground
+		hexField.BorderColor3 = Theme.TabBorder
 		hexField.BorderMode = Enum.BorderMode.Inset
 		hexField.BorderSizePixel = 1
 		hexField.Position = UDim2.new(0.5, 0, 1, -6)
 		hexField.Size = UDim2.new(1, -12, 0, 22)
 		hexField.Font = Enum.Font.Code
 		hexField.Text = ""
-		hexField.TextColor3 = Color3.fromRGB(255, 255, 255)
+		hexField.TextColor3 = Theme.Text
 		hexField.TextSize = 14
 		hexField.TextTruncate = Enum.TextTruncate.AtEnd
 		hexField.TextXAlignment = Enum.TextXAlignment.Center
@@ -447,8 +464,8 @@ function Window:CreateTab(name: string, properties: {[string]: any}?): typeof(Ta
 	button.Parent = self.objects.tabs
 	button.AutomaticSize = Enum.AutomaticSize.X
 	button.AutoButtonColor = false
-	button.BackgroundColor3 = Color3.fromRGB(42, 42, 42)
-	button.BorderColor3 = Color3.fromRGB(70, 70, 70)
+	button.BackgroundColor3 = Theme.TabBackground
+	button.BorderColor3 = Theme.TabBorder
 	button.BorderMode = Enum.BorderMode.Inset
 	button.BorderSizePixel = 1
 	button.Size = UDim2.fromOffset(0, 24)
@@ -461,7 +478,7 @@ function Window:CreateTab(name: string, properties: {[string]: any}?): typeof(Ta
 	text.Size = UDim2.fromScale(1, 1)
 	text.Font = Enum.Font.Code
 	text.Text = name
-	text.TextColor3 = Color3.fromRGB(255, 255, 255)
+	text.TextColor3 = Theme.Text
 	text.TextSize = 14
 
 	local uiPadding = Instance.new("UIPadding")
@@ -472,7 +489,7 @@ function Window:CreateTab(name: string, properties: {[string]: any}?): typeof(Ta
 	local fill = Instance.new("Frame")
 	fill.Parent = button
 	fill.AnchorPoint = Vector2.new(0.5, 1)
-	fill.BackgroundColor3 = Color3.fromRGB(42, 42, 42)
+	fill.BackgroundColor3 = Theme.TabBackground
 	fill.BorderSizePixel = 0
 	fill.Position = UDim2.new(0.5, 0, 1, 2)
 	fill.Size = UDim2.new(1, 0, 0, 2)
@@ -539,14 +556,14 @@ function Window:CreateTab(name: string, properties: {[string]: any}?): typeof(Ta
 	function tab.updateVisual(selected: boolean)
 		for _, t in self.tabs do
 			if selected then
-				button.BackgroundColor3 = Color3.fromRGB(42, 42, 42)
-				button.BorderColor3 = Color3.fromRGB(70, 70, 70)
-				text.TextColor3 = Color3.fromRGB(255, 255, 255)
+				button.BackgroundColor3 = Theme.TabBackground
+				button.BorderColor3 = Theme.TabBorder
+				text.TextColor3 = Theme.Text
 				fill.Position = UDim2.new(0.5, 0, 1, 2)
 			else
-				button.BackgroundColor3 = Color3.fromRGB(36, 36, 36)
-				button.BorderColor3 = Color3.fromRGB(58, 58, 58)
-				text.TextColor3 = Color3.fromRGB(144, 144, 144)
+				button.BackgroundColor3 = Theme.WindowBackground
+				button.BorderColor3 = Theme.TabBorderDark
+				text.TextColor3 = Theme.TextDark
 				fill.Position = UDim2.new(0.5, 0, 1, 1)
 			end
 			fill.BackgroundColor3 = button.BackgroundColor3
@@ -587,8 +604,8 @@ function Tab:CreateSection(name: string, right: boolean?): typeof(Section)
 
 	local background = Instance.new("Frame")
 	background.Parent = frame
-	background.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
-	background.BorderColor3 = Color3.fromRGB(63, 63, 63)
+	background.BackgroundColor3 = Theme.SectionBackground
+	background.BorderColor3 = Theme.SectionBorder
 	background.BorderMode = Enum.BorderMode.Inset
 	background.BorderSizePixel = 1
 	background.Position = UDim2.new()
@@ -596,7 +613,7 @@ function Tab:CreateSection(name: string, right: boolean?): typeof(Section)
 
 	local line = Instance.new("Frame")
 	line.Parent = frame
-	line.BackgroundColor3 = Color3.fromRGB(179, 87, 255)
+	line.BackgroundColor3 = Theme.Accent
 	line.BorderSizePixel = 0
 	line.Position = UDim2.new()
 	line.Size = UDim2.new(1, 0, 0, 1)
@@ -611,7 +628,7 @@ function Tab:CreateSection(name: string, right: boolean?): typeof(Section)
 
 	local fill = Instance.new("Frame")
 	fill.Parent = textSpace
-	fill.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+	fill.BackgroundColor3 = Theme.SectionBackground
 	fill.BorderSizePixel = 0
 	fill.Position = UDim2.new()
 	fill.Size = UDim2.new(1, 0, 0, 1)
@@ -623,7 +640,7 @@ function Tab:CreateSection(name: string, right: boolean?): typeof(Section)
 	text.BorderSizePixel = 0
 	text.Font = Enum.Font.Code
 	text.Text = name
-	text.TextColor3 = Color3.fromRGB(179, 87, 255)
+	text.TextColor3 = Theme.Accent
 	text.TextSize = 14
 	text.Position = UDim2.fromOffset(0, -8)
 	text.Size = UDim2.fromOffset(0, 14)
@@ -675,7 +692,7 @@ function Section:AddToggle(name: string, properties: {[string]: any}?): ()
 	text.Size = UDim2.new(1, -34, 0, 14)
 	text.Font = Enum.Font.Code
 	text.Text = name
-	text.TextColor3 = Color3.fromRGB(255, 255, 255)
+	text.TextColor3 = Theme.Text
 	text.TextSize = 14
 	text.TextTruncate = Enum.TextTruncate.AtEnd
 	text.TextXAlignment = Enum.TextXAlignment.Left
@@ -683,8 +700,8 @@ function Section:AddToggle(name: string, properties: {[string]: any}?): ()
 	local switch = Instance.new("Frame")
 	switch.Parent = button
 	switch.AnchorPoint = Vector2.new(0, 0.5)
-	switch.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
-	switch.BorderColor3 = Color3.fromRGB(88, 88, 88)
+	switch.BackgroundColor3 = Theme.ElementBackground
+	switch.BorderColor3 = Theme.ElementBorder
 	switch.BorderSizePixel = 1
 	switch.BorderMode = Enum.BorderMode.Inset
 	switch.Position = UDim2.new(0, 8, 0.5, 0)
@@ -700,7 +717,7 @@ function Section:AddToggle(name: string, properties: {[string]: any}?): ()
 	local core = Instance.new("Frame")
 	core.Parent = coreHolder
 	core.AnchorPoint = Vector2.new(0.5, 0.5)
-	core.BackgroundColor3 = Color3.fromRGB(179, 87, 255)
+	core.BackgroundColor3 = Theme.Accent
 	core.BorderSizePixel = 0
 	core.Position = UDim2.fromScale(0.5, 0.5)
 	core.Size = UDim2.fromScale(1, 1)
@@ -758,7 +775,7 @@ function Section:AddSlider(name: string, properties: {[string]: any}?): ()
 	text.Size = UDim2.new(1, -8, 0, 14)
 	text.Font = Enum.Font.Code
 	text.Text = name
-	text.TextColor3 = Color3.fromRGB(255, 255, 255)
+	text.TextColor3 = Theme.Text
 	text.TextSize = 14
 	text.TextTruncate = Enum.TextTruncate.AtEnd
 	text.TextXAlignment = Enum.TextXAlignment.Left
@@ -770,8 +787,8 @@ function Section:AddSlider(name: string, properties: {[string]: any}?): ()
 	slider.AutoButtonColor = false
 	slider.AnchorPoint = Vector2.new(0.5, 1)
 	slider.Image = ""
-	slider.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
-	slider.BorderColor3 = Color3.fromRGB(88, 88, 88)
+	slider.BackgroundColor3 = Theme.ElementBackground
+	slider.BorderColor3 = Theme.ElementBorder
 	slider.BorderMode = Enum.BorderMode.Inset
 	slider.BorderSizePixel = 1
 	slider.Position = UDim2.new(0.5, 0, 1, -4)
@@ -779,7 +796,7 @@ function Section:AddSlider(name: string, properties: {[string]: any}?): ()
 
 	local progress = Instance.new("Frame")
 	progress.Parent = slider
-	progress.BackgroundColor3 = Color3.fromRGB(179, 87, 255)
+	progress.BackgroundColor3 = Theme.Accent
 	progress.BorderSizePixel = 0
 	progress.Position = UDim2.new()
 	progress.Size = UDim2.new(1, 0, 1, 0)
@@ -866,7 +883,7 @@ function Section:AddColor(name: string, properties: {[string]: any}?): ()
 	panel.Parent = button
 	panel.AnchorPoint = Vector2.new(1, 0.5)
 	panel.BackgroundColor3 = defValue
-	panel.BorderColor3 = Color3.fromRGB(88, 88, 88)
+	panel.BorderColor3 = Theme.ElementBorder
 	panel.BorderMode = Enum.BorderMode.Inset
 	panel.BorderSizePixel = 1
 	panel.Position = UDim2.new(1, -8, 0.5, 0)
@@ -892,7 +909,7 @@ function Section:AddColor(name: string, properties: {[string]: any}?): ()
 	text.Size = UDim2.new(1, -44, 0, 14)
 	text.Font = Enum.Font.Code
 	text.Text = name
-	text.TextColor3 = Color3.fromRGB(255, 255, 255)
+	text.TextColor3 = Theme.Text
 	text.TextSize = 14
 	text.TextXAlignment = Enum.TextXAlignment.Left
 	text.TextTruncate = Enum.TextTruncate.AtEnd
