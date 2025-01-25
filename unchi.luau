@@ -16,13 +16,13 @@ local Theme = {
 	TabBorderDark = Color3.fromRGB(54, 54, 54),
 	SectionBackground = Color3.fromRGB(48, 48, 48),
 	SectionBorder = Color3.fromRGB(63, 63, 63),
-	SectionOuterBorder = Color3.fromRGB(34, 34, 34),
+	SectionOuterBorder = Color3.fromRGB(30, 30, 30),
 	Text = Color3.fromRGB(240, 240, 240),
 	TextDark = Color3.fromRGB(140, 140, 140),
 	ElementBackground = Color3.fromRGB(48, 48, 48),
 	ElementBorder = Color3.fromRGB(88, 88, 88),
-	ElementOuterBorder = Color3.fromRGB(40, 40, 40),
-	ButtonBackground = Color3.fromRGB(71, 71, 71),
+	ElementOuterBorder = Color3.fromRGB(38, 38, 38),
+	ButtonBackground = Color3.fromRGB(68, 68, 68),
 	ButtonText = Color3.fromRGB(185, 185, 185),
 }
 
@@ -129,7 +129,7 @@ end
 function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typeof(Window)
 	properties = properties or {}
 	local width = properties.Width or 440
-	local height = properties.Height or 500
+	local height = properties.Height or 510
 	
 	local window = setmetatable({}, Window)
 	window.tabs = {}
@@ -170,7 +170,7 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 	title.AnchorPoint = Vector2.new(0.5, 0)
 	title.BackgroundTransparency = 1
 	title.Position = UDim2.new(0.5, 0, 0, 10)
-	title.Size = UDim2.new(1, -24, 0, 14)
+	title.Size = UDim2.new(1, -20, 0, 14)
 	title.Font = Enum.Font.Code
 	title.Text = name
 	title.TextColor3 = Theme.Accent
@@ -183,7 +183,7 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 	tabSections.AnchorPoint = Vector2.new(0.5, 1)
 	tabSections.BackgroundColor3 = Theme.TabBackground
 	tabSections.Position = UDim2.new(0.5, 0, 1, -8)
-	tabSections.Size = UDim2.new(1, -16, 1, -66)
+	tabSections.Size = UDim2.new(1, -16, 1, -64)
 	tabSections.BorderColor3 = Theme.TabBorder
 	tabSections.BorderMode = Enum.BorderMode.Inset
 	tabSections.BorderSizePixel = 1
@@ -192,7 +192,7 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 	tabs.Parent = root
 	tabs.AnchorPoint = Vector2.new(0.5, 0)
 	tabs.BackgroundTransparency = 1
-	tabs.Position = UDim2.new(0.5, 0, 0, 34)
+	tabs.Position = UDim2.new(0.5, 0, 0, 32)
 	tabs.Size = UDim2.new(1, -16, 0, 25)
 	tabs.ScrollBarThickness = 0
 	tabs.ScrollingDirection = Enum.ScrollingDirection.X
