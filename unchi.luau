@@ -16,10 +16,12 @@ local Theme = {
 	TabBorderDark = Color3.fromRGB(54, 54, 54),
 	SectionBackground = Color3.fromRGB(48, 48, 48),
 	SectionBorder = Color3.fromRGB(63, 63, 63),
+	SectionOuterBorder = Color3.fromRGB(34, 34, 34),
 	Text = Color3.fromRGB(240, 240, 240),
 	TextDark = Color3.fromRGB(140, 140, 140),
 	ElementBackground = Color3.fromRGB(48, 48, 48),
 	ElementBorder = Color3.fromRGB(88, 88, 88),
+	ElementOuterBorder = Color3.fromRGB(40, 40, 40),
 	ButtonBackground = Color3.fromRGB(71, 71, 71),
 	ButtonText = Color3.fromRGB(185, 185, 185),
 }
@@ -126,7 +128,7 @@ end
 
 function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typeof(Window)
 	properties = properties or {}
-	local width = properties.Width or 460
+	local width = properties.Width or 440
 	local height = properties.Height or 500
 	
 	local window = setmetatable({}, Window)
@@ -167,7 +169,7 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 	title.Parent = root
 	title.AnchorPoint = Vector2.new(0.5, 0)
 	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0.5, 0, 0, 8)
+	title.Position = UDim2.new(0.5, 0, 0, 10)
 	title.Size = UDim2.new(1, -24, 0, 14)
 	title.Font = Enum.Font.Code
 	title.Text = name
@@ -180,8 +182,8 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 	tabSections.Parent = root
 	tabSections.AnchorPoint = Vector2.new(0.5, 1)
 	tabSections.BackgroundColor3 = Theme.TabBackground
-	tabSections.Position = UDim2.new(0.5, 0, 1, -10)
-	tabSections.Size = UDim2.new(1, -20, 1, -68)
+	tabSections.Position = UDim2.new(0.5, 0, 1, -8)
+	tabSections.Size = UDim2.new(1, -16, 1, -66)
 	tabSections.BorderColor3 = Theme.TabBorder
 	tabSections.BorderMode = Enum.BorderMode.Inset
 	tabSections.BorderSizePixel = 1
@@ -191,7 +193,7 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 	tabs.AnchorPoint = Vector2.new(0.5, 0)
 	tabs.BackgroundTransparency = 1
 	tabs.Position = UDim2.new(0.5, 0, 0, 34)
-	tabs.Size = UDim2.new(1, -20, 0, 25)
+	tabs.Size = UDim2.new(1, -16, 0, 25)
 	tabs.ScrollBarThickness = 0
 	tabs.ScrollingDirection = Enum.ScrollingDirection.X
 	tabs.CanvasSize = UDim2.new()
@@ -602,41 +604,43 @@ function Tab:CreateSection(name: string, right: boolean?): typeof(Section)
 
 	local frame = Instance.new("Frame")
 	frame.Parent = right and self.objects.sectionsR or self.objects.sectionsL
-	frame.BackgroundTransparency = 1
+	frame.BackgroundColor3 = Theme.SectionOuterBorder
 	frame.BorderSizePixel = 0
 	frame.AutomaticSize = Enum.AutomaticSize.Y
 	frame.Size = UDim2.fromScale(1, 0)
-
+	
 	local background = Instance.new("Frame")
 	background.Parent = frame
 	background.BackgroundColor3 = Theme.SectionBackground
 	background.BorderColor3 = Theme.SectionBorder
 	background.BorderMode = Enum.BorderMode.Inset
 	background.BorderSizePixel = 1
-	background.Position = UDim2.new()
-	background.Size = UDim2.fromScale(1, 1)
+	background.AnchorPoint = Vector2.new(0.5, 0.5)
+	background.Position = UDim2.fromScale(0.5, 0.5)
+	background.Size = UDim2.new(1, -2, 1, -2)
 
 	local line = Instance.new("Frame")
 	line.Parent = frame
+	line.AnchorPoint = Vector2.new(0.5, 0)
 	line.BackgroundColor3 = Theme.Accent
 	line.BorderSizePixel = 0
-	line.Position = UDim2.new()
-	line.Size = UDim2.new(1, 0, 0, 1)
+	line.Position = UDim2.fromScale(0.5, 0)
+	line.Size = UDim2.new(1, -2, 0, 1)
 
 	local textSpace = Instance.new("Frame")
 	textSpace.Parent = frame
 	textSpace.AutomaticSize = Enum.AutomaticSize.X
 	textSpace.BackgroundTransparency = 1
 	textSpace.BorderSizePixel = 0
-	textSpace.Position = UDim2.fromOffset(10, 0)
+	textSpace.Position = UDim2.fromOffset(10, -1)
 	textSpace.Size = UDim2.fromOffset(0, 1)
 
 	local fill = Instance.new("Frame")
 	fill.Parent = textSpace
 	fill.BackgroundColor3 = Theme.SectionBackground
 	fill.BorderSizePixel = 0
-	fill.Position = UDim2.new()
-	fill.Size = UDim2.new(1, 0, 0, 1)
+	fill.Position = UDim2.fromOffset(0, 1)
+	fill.Size = UDim2.new(1, 0, 0, 2)
 
 	local text = Instance.new("TextLabel")
 	text.Parent = textSpace
@@ -664,7 +668,7 @@ function Tab:CreateSection(name: string, right: boolean?): typeof(Section)
 
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = elements
-	uiPadding.PaddingTop = UDim.new(0, 6)
+	uiPadding.PaddingTop = UDim.new(0, 8)
 	uiPadding.PaddingBottom = UDim.new(0, 4)
 
 	local uiList = Instance.new("UIListLayout")
@@ -694,7 +698,7 @@ function Section:AddToggle(name: string, properties: {[string]: any}?): ()
 	text.AnchorPoint = Vector2.new(1, 0.5)
 	text.BackgroundTransparency = 1
 	text.Position = UDim2.new(1, 0, 0.5, 0)
-	text.Size = UDim2.new(1, -34, 0, 14)
+	text.Size = UDim2.new(1, -32, 0, 14)
 	text.Font = Enum.Font.Code
 	text.Text = name
 	text.TextColor3 = Theme.Text
@@ -705,15 +709,23 @@ function Section:AddToggle(name: string, properties: {[string]: any}?): ()
 	local switch = Instance.new("Frame")
 	switch.Parent = button
 	switch.AnchorPoint = Vector2.new(0, 0.5)
-	switch.BackgroundColor3 = Theme.ElementBackground
-	switch.BorderColor3 = Theme.ElementBorder
-	switch.BorderSizePixel = 1
-	switch.BorderMode = Enum.BorderMode.Inset
+	switch.BackgroundColor3 = Theme.ElementOuterBorder
+	switch.BorderSizePixel = 0
 	switch.Position = UDim2.new(0, 8, 0.5, 0)
-	switch.Size = UDim2.fromOffset(12, 12)
+	switch.Size = UDim2.fromOffset(14, 14)
+	
+	local background = Instance.new("Frame")
+	background.Parent = switch
+	background.BackgroundColor3 = Theme.ElementBackground
+	background.BorderColor3 = Theme.ElementBorder
+	background.BorderMode = Enum.BorderMode.Inset
+	background.BorderSizePixel = 1
+	background.AnchorPoint = Vector2.new(0.5, 0.5)
+	background.Position = UDim2.fromScale(0.5, 0.5)
+	background.Size = UDim2.new(1, -2, 1, -2)
 
 	local coreHolder = Instance.new("Frame")
-	coreHolder.Parent = switch
+	coreHolder.Parent = background
 	coreHolder.AnchorPoint = Vector2.new(0.5, 0.5)
 	coreHolder.BackgroundTransparency = 1
 	coreHolder.Position = UDim2.fromScale(0.5, 0.5)
@@ -759,32 +771,44 @@ function Section:AddToggle(name: string, properties: {[string]: any}?): ()
 	
 	do -- ホールド時のアニメーション
 		local _tween = nil
+		local _hover = false
+		local _hold = false
+
+		local function updateAnim(hold: boolean)
+			if _tween then
+				_tween:Cancel()
+			end
+
+			local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
+			_tween = TweenService:Create(switch, info, {
+				BackgroundColor3 = hold and Theme.Accent or Theme.WindowBackground
+			})
+			_tween:Play()
+		end
 
 		AddConnection(button.InputBegan, function(input: InputObject)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
-				if _tween then
-					_tween:Cancel()
+				_hover = true
+				if not _hold then
+					updateAnim(true)
 				end
-
-				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
-				_tween = TweenService:Create(switch, info, {
-					BorderColor3 = Theme.Accent
-				})
-				_tween:Play()
+			end
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				_hold = true
+				updateAnim(false)
 			end
 		end)
 
 		AddConnection(button.InputEnded, function(input: InputObject)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
-				if _tween then
-					_tween:Cancel()
+				_hover = false
+				updateAnim(false)
+			end
+			if (input.UserInputType == Enum.UserInputType.MouseButton1) and (input.UserInputState == Enum.UserInputState.End) then
+				_hold = false
+				if _hover then
+					updateAnim(true)
 				end
-
-				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
-				_tween = TweenService:Create(switch, info, {
-					BorderColor3 = Theme.ElementBorder
-				})
-				_tween:Play()
 			end
 		end)
 	end
@@ -804,14 +828,14 @@ function Section:AddSlider(name: string, properties: {[string]: any}?): ()
 	local frame = Instance.new("Frame")
 	frame.Parent = self.objects.elements
 	frame.BackgroundTransparency = 1
-	frame.Size = UDim2.new(1, 0, 0, 44)
+	frame.Size = UDim2.new(1, 0, 0, 48)
 
 	local text = Instance.new("TextLabel")
 	text.Parent = frame
 	text.AnchorPoint = Vector2.new(1, 0)
 	text.BackgroundTransparency = 1
 	text.Position = UDim2.new(1, 0, 0, 4)
-	text.Size = UDim2.new(1, -8, 0, 14)
+	text.Size = UDim2.new(1, -10, 0, 14)
 	text.Font = Enum.Font.Code
 	text.Text = name
 	text.TextColor3 = Theme.Text
@@ -826,15 +850,30 @@ function Section:AddSlider(name: string, properties: {[string]: any}?): ()
 	slider.AutoButtonColor = false
 	slider.AnchorPoint = Vector2.new(0.5, 1)
 	slider.Image = ""
-	slider.BackgroundColor3 = Theme.ElementBackground
-	slider.BorderColor3 = Theme.ElementBorder
-	slider.BorderMode = Enum.BorderMode.Inset
-	slider.BorderSizePixel = 1
+	slider.BackgroundColor3 = Theme.ElementOuterBorder
+	slider.BorderSizePixel = 0
 	slider.Position = UDim2.new(0.5, 0, 1, -4)
-	slider.Size = UDim2.new(1, -16, 0, 16)
+	slider.Size = UDim2.new(1, -16, 0, 20)
+	
+	local background = Instance.new("Frame")
+	background.Parent = slider
+	background.BackgroundColor3 = Theme.ElementBackground
+	background.BorderColor3 = Theme.ElementBorder
+	background.BorderMode = Enum.BorderMode.Inset
+	background.BorderSizePixel = 1
+	background.AnchorPoint = Vector2.new(0.5, 0.5)
+	background.Position = UDim2.fromScale(0.5, 0.5)
+	background.Size = UDim2.new(1, -2, 1, -2)
+	
+	local progressHolder = Instance.new("Frame")
+	progressHolder.Parent = background
+	progressHolder.AnchorPoint = Vector2.new(0.5, 0.5)
+	progressHolder.BackgroundTransparency = 1
+	progressHolder.Position = UDim2.fromScale(0.5, 0.5)
+	progressHolder.Size = UDim2.new(1, -2, 1, -2)
 
 	local progress = Instance.new("Frame")
-	progress.Parent = slider
+	progress.Parent = progressHolder
 	progress.BackgroundColor3 = Theme.Accent
 	progress.BorderSizePixel = 0
 	progress.Position = UDim2.new()
@@ -869,8 +908,8 @@ function Section:AddSlider(name: string, properties: {[string]: any}?): ()
 		end
 
 		local function handleInput(input: InputObject)
-			local relativePos = input.Position.X - slider.AbsolutePosition.X
-			local ratio = math.clamp(relativePos / slider.AbsoluteSize.X, 0, 1)
+			local relativePos = input.Position.X - progressHolder.AbsolutePosition.X
+			local ratio = math.clamp(relativePos / progressHolder.AbsoluteSize.X, 0, 1)
 			local rangeValue = math.round(ratio * range * decimalScale) / decimalScale
 			local value = math.clamp(rangeValue + min, min, max)
 
@@ -907,32 +946,44 @@ function Section:AddSlider(name: string, properties: {[string]: any}?): ()
 	
 	do -- ホールド時のアニメーション
 		local _tween = nil
+		local _hover = false
+		local _hold = false
+
+		local function updateAnim(hold: boolean)
+			if _tween then
+				_tween:Cancel()
+			end
+
+			local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
+			_tween = TweenService:Create(slider, info, {
+				BackgroundColor3 = hold and Theme.Accent or Theme.WindowBackground
+			})
+			_tween:Play()
+		end
 
 		AddConnection(slider.InputBegan, function(input: InputObject)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
-				if _tween then
-					_tween:Cancel()
+				_hover = true
+				if not _hold then
+					updateAnim(true)
 				end
-
-				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
-				_tween = TweenService:Create(slider, info, {
-					BorderColor3 = Theme.Accent
-				})
-				_tween:Play()
+			end
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				_hold = true
+				updateAnim(false)
 			end
 		end)
 
 		AddConnection(slider.InputEnded, function(input: InputObject)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
-				if _tween then
-					_tween:Cancel()
+				_hover = false
+				updateAnim(false)
+			end
+			if (input.UserInputType == Enum.UserInputType.MouseButton1) and (input.UserInputState == Enum.UserInputState.End) then
+				_hold = false
+				if _hover then
+					updateAnim(true)
 				end
-
-				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
-				_tween = TweenService:Create(slider, info, {
-					BorderColor3 = Theme.ElementBorder
-				})
-				_tween:Play()
 			end
 		end)
 	end
@@ -950,15 +1001,31 @@ function Section:AddColor(name: string, properties: {[string]: any}?): ()
 	button.Size = UDim2.new(1, 0, 0, 22)
 	button.Image = ""
 
+	local background = Instance.new("Frame")
+	background.Parent = button
+	background.AnchorPoint = Vector2.new(1, 0.5)
+	background.BackgroundColor3 = Theme.ElementOuterBorder
+	background.BorderSizePixel = 0
+	background.Position = UDim2.new(1, -8, 0.5, 0)
+	background.Size = UDim2.fromOffset(24, 16)
+	
+	local panelHolder = Instance.new("Frame")
+	panelHolder.Parent = background
+	panelHolder.BackgroundColor3 = Theme.ElementBackground
+	panelHolder.BorderColor3 = Theme.ElementBorder
+	panelHolder.BorderMode = Enum.BorderMode.Inset
+	panelHolder.BorderSizePixel = 1
+	panelHolder.AnchorPoint = Vector2.new(0.5, 0.5)
+	panelHolder.Position = UDim2.fromScale(0.5, 0.5)
+	panelHolder.Size = UDim2.new(1, -2, 1, -2)
+	
 	local panel = Instance.new("Frame")
-	panel.Parent = button
-	panel.AnchorPoint = Vector2.new(1, 0.5)
+	panel.Parent = panelHolder
 	panel.BackgroundColor3 = defValue
-	panel.BorderColor3 = Theme.ElementBorder
-	panel.BorderMode = Enum.BorderMode.Inset
-	panel.BorderSizePixel = 1
-	panel.Position = UDim2.new(1, -8, 0.5, 0)
-	panel.Size = UDim2.fromOffset(24, 14)
+	panel.BorderSizePixel = 0
+	panel.AnchorPoint = Vector2.new(0.5, 0.5)
+	panel.Position = UDim2.fromScale(0.5, 0.5)
+	panel.Size = UDim2.new(1, -2, 1, -2)
 
 	local gradient = Instance.new("Frame")
 	gradient.Parent = panel
@@ -976,8 +1043,8 @@ function Section:AddColor(name: string, properties: {[string]: any}?): ()
 	text.Parent = button
 	text.AnchorPoint = Vector2.new(0, 0.5)
 	text.BackgroundTransparency = 1
-	text.Position = UDim2.new(0, 8, 0.5, 0)
-	text.Size = UDim2.new(1, -44, 0, 14)
+	text.Position = UDim2.new(0, 10, 0.5, 0)
+	text.Size = UDim2.new(1, -46, 0, 14)
 	text.Font = Enum.Font.Code
 	text.Text = name
 	text.TextColor3 = Theme.Text
@@ -1024,32 +1091,44 @@ function Section:AddColor(name: string, properties: {[string]: any}?): ()
 	
 	do -- ホールド時のアニメーション
 		local _tween = nil
+		local _hover = false
+		local _hold = false
+
+		local function updateAnim(hold: boolean)
+			if _tween then
+				_tween:Cancel()
+			end
+
+			local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
+			_tween = TweenService:Create(background, info, {
+				BackgroundColor3 = hold and Theme.Accent or Theme.WindowBackground
+			})
+			_tween:Play()
+		end
 
 		AddConnection(button.InputBegan, function(input: InputObject)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
-				if _tween then
-					_tween:Cancel()
+				_hover = true
+				if not _hold then
+					updateAnim(true)
 				end
-
-				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
-				_tween = TweenService:Create(panel, info, {
-					BorderColor3 = Theme.Accent
-				})
-				_tween:Play()
+			end
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				_hold = true
+				updateAnim(false)
 			end
 		end)
 
 		AddConnection(button.InputEnded, function(input: InputObject)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
-				if _tween then
-					_tween:Cancel()
+				_hover = false
+				updateAnim(false)
+			end
+			if (input.UserInputType == Enum.UserInputType.MouseButton1) and (input.UserInputState == Enum.UserInputState.End) then
+				_hold = false
+				if _hover then
+					updateAnim(true)
 				end
-
-				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
-				_tween = TweenService:Create(panel, info, {
-					BorderColor3 = Theme.ElementBorder
-				})
-				_tween:Play()
 			end
 		end)
 	end
@@ -1068,18 +1147,26 @@ function Section:AddButton(name: string, properties: {[string]: any}): ()
 	button.Parent = frame
 	button.AnchorPoint = Vector2.new(0.5, 0.5)
 	button.AutoButtonColor = false
-	button.BackgroundColor3 = Theme.ButtonBackground
-	button.BorderColor3 = Theme.ElementBorder
-	button.BorderMode = Enum.BorderMode.Inset
-	button.BorderSizePixel = 1
+	button.BackgroundColor3 = Theme.ElementOuterBorder
+	button.BorderSizePixel = 0
 	button.Position = UDim2.fromScale(0.5, 0.5)
-	button.Size = UDim2.new(1, -16, 0, 24)
+	button.Size = UDim2.new(1, -16, 0, 26)
 	button.Image= ""
 	
-	AddGradientFrame(button, {Color3.fromRGB(0, 0, 0)}, {0.6, 1}, -90)
+	local background = Instance.new("Frame")
+	background.Parent = button
+	background.AnchorPoint = Vector2.new(0.5, 0.5)
+	background.BackgroundColor3 = Theme.ButtonBackground
+	background.BorderColor3 = Theme.ElementBorder
+	background.BorderMode = Enum.BorderMode.Inset
+	background.BorderSizePixel = 1
+	background.Position = UDim2.fromScale(0.5, 0.5)
+	background.Size = UDim2.new(1, -2, 1, -2)
+	
+	AddGradientFrame(background, {Color3.fromRGB(0, 0, 0)}, {0.6, 1}, -90)
 	
 	local text = Instance.new("TextLabel")
-	text.Parent = button
+	text.Parent = background
 	text.BackgroundTransparency = 1
 	text.Size = UDim2.fromScale(1, 1)
 	text.Font = Enum.Font.Code
@@ -1096,32 +1183,44 @@ function Section:AddButton(name: string, properties: {[string]: any}): ()
 	
 	do -- ホールド時のアニメーション
 		local _tween = nil
+		local _hover = false
+		local _hold = false
+		
+		local function updateAnim(hold: boolean)
+			if _tween then
+				_tween:Cancel()
+			end
+
+			local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
+			_tween = TweenService:Create(button, info, {
+				BackgroundColor3 = hold and Theme.Accent or Theme.WindowBackground
+			})
+			_tween:Play()
+		end
 
 		AddConnection(button.InputBegan, function(input: InputObject)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
-				if _tween then
-					_tween:Cancel()
+				_hover = true
+				if not _hold then
+					updateAnim(true)
 				end
-
-				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
-				_tween = TweenService:Create(button, info, {
-					BorderColor3 = Theme.Accent
-				})
-				_tween:Play()
+			end
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				_hold = true
+				updateAnim(false)
 			end
 		end)
 
 		AddConnection(button.InputEnded, function(input: InputObject)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
-				if _tween then
-					_tween:Cancel()
+				_hover = false
+				updateAnim(false)
+			end
+			if (input.UserInputType == Enum.UserInputType.MouseButton1) and (input.UserInputState == Enum.UserInputState.End) then
+				_hold = false
+				if _hover then
+					updateAnim(true)
 				end
-
-				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
-				_tween = TweenService:Create(button, info, {
-					BorderColor3 = Theme.ElementBorder
-				})
-				_tween:Play()
 			end
 		end)
 	end
