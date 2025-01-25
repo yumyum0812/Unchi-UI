@@ -6,19 +6,22 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 
+-- テーマ
 local Theme = {
 	Accent = Color3.fromRGB(176, 79, 255),
 	WindowBackground = Color3.fromRGB(36, 36, 36),
 	WindowBorder = Color3.fromRGB(83, 83, 83),
 	TabBackground = Color3.fromRGB(42, 42, 42),
 	TabBorder = Color3.fromRGB(70, 70, 70),
-	TabBorderDark = Color3.fromRGB(58, 58, 58),
+	TabBorderDark = Color3.fromRGB(54, 54, 54),
 	SectionBackground = Color3.fromRGB(48, 48, 48),
 	SectionBorder = Color3.fromRGB(63, 63, 63),
 	Text = Color3.fromRGB(240, 240, 240),
-	TextDark = Color3.fromRGB(144, 144, 144),
+	TextDark = Color3.fromRGB(140, 140, 140),
 	ElementBackground = Color3.fromRGB(48, 48, 48),
 	ElementBorder = Color3.fromRGB(88, 88, 88),
+	ButtonBackground = Color3.fromRGB(71, 71, 71),
+	ButtonText = Color3.fromRGB(185, 185, 185),
 }
 
 -- 変数
@@ -27,8 +30,10 @@ local screenGui = Instance.new("ScreenGui")
 -- クラス
 local Section = {}
 Section.__index = Section
+
 local Tab = {}
 Tab.__index = Tab
+
 local Window = {}
 Window.__index = Window
 
@@ -724,31 +729,65 @@ function Section:AddToggle(name: string, properties: {[string]: any}?): ()
 	
 	AddGradientFrame(core, {Color3.fromRGB(0, 0, 0)}, {0.6, 1}, -90)
 
-	local _value = properties.Value or false
-	local _tween = nil
+	do
+		local _value = properties.Value or false
+		local _tween = nil
 
-	local function updateVisual(silent: boolean?)
-		if _tween and (_tween.PlaybackState ~= Enum.PlaybackState.Completed) then
-			_tween:Cancel()
+		local function updateVisual(silent: boolean?)
+			if _tween and (_tween.PlaybackState ~= Enum.PlaybackState.Completed) then
+				_tween:Cancel()
+			end
+
+			if silent then
+				core.Size = _value and UDim2.fromScale(1, 1) or UDim2.new()
+			else
+				local info = TweenInfo.new(0.1, Enum.EasingStyle.Sine)
+				local scale = _value and UDim2.fromScale(1, 1) or UDim2.new()
+				_tween = TweenService:Create(core, info, {Size = scale})
+				_tween:Play()
+			end
 		end
 
-		if silent then
-			core.Size = _value and UDim2.fromScale(1, 1) or UDim2.new()
-		else
-			local info = TweenInfo.new(0.1, Enum.EasingStyle.Sine)
-			local scale = _value and UDim2.fromScale(1, 1) or UDim2.new()
-			_tween = TweenService:Create(core, info, {Size = scale})
-			_tween:Play()
-		end
+		AddConnection(button.Activated, function()
+			_value = not _value
+			updateVisual()
+			callback(_value)
+		end)
+
+		updateVisual(true)
 	end
+	
+	do -- ホールド時のアニメーション
+		local _tween = nil
 
-	AddConnection(button.Activated, function()
-		_value = not _value
-		updateVisual()
-		callback(_value)
-	end)
+		AddConnection(button.InputBegan, function(input: InputObject)
+			if input.UserInputType == Enum.UserInputType.MouseMovement then
+				if _tween then
+					_tween:Cancel()
+				end
 
-	updateVisual(true)
+				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
+				_tween = TweenService:Create(switch, info, {
+					BorderColor3 = Theme.Accent
+				})
+				_tween:Play()
+			end
+		end)
+
+		AddConnection(button.InputEnded, function(input: InputObject)
+			if input.UserInputType == Enum.UserInputType.MouseMovement then
+				if _tween then
+					_tween:Cancel()
+				end
+
+				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
+				_tween = TweenService:Create(switch, info, {
+					BorderColor3 = Theme.ElementBorder
+				})
+				_tween:Play()
+			end
+		end)
+	end
 end
 
 function Section:AddSlider(name: string, properties: {[string]: any}?): ()
@@ -865,6 +904,38 @@ function Section:AddSlider(name: string, properties: {[string]: any}?): ()
 
 		updateVisual(true)
 	end
+	
+	do -- ホールド時のアニメーション
+		local _tween = nil
+
+		AddConnection(slider.InputBegan, function(input: InputObject)
+			if input.UserInputType == Enum.UserInputType.MouseMovement then
+				if _tween then
+					_tween:Cancel()
+				end
+
+				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
+				_tween = TweenService:Create(slider, info, {
+					BorderColor3 = Theme.Accent
+				})
+				_tween:Play()
+			end
+		end)
+
+		AddConnection(slider.InputEnded, function(input: InputObject)
+			if input.UserInputType == Enum.UserInputType.MouseMovement then
+				if _tween then
+					_tween:Cancel()
+				end
+
+				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
+				_tween = TweenService:Create(slider, info, {
+					BorderColor3 = Theme.ElementBorder
+				})
+				_tween:Play()
+			end
+		end)
+	end
 end
 
 function Section:AddColor(name: string, properties: {[string]: any}?): ()
@@ -947,6 +1018,110 @@ function Section:AddColor(name: string, properties: {[string]: any}?): ()
 				pickerRoot.Parent = windowRoot
 				pickerRoot.Visible = true
 				pickerRoot.Position = UDim2.fromOffset(rel.X, rel.Y)
+			end
+		end)
+	end
+	
+	do -- ホールド時のアニメーション
+		local _tween = nil
+
+		AddConnection(button.InputBegan, function(input: InputObject)
+			if input.UserInputType == Enum.UserInputType.MouseMovement then
+				if _tween then
+					_tween:Cancel()
+				end
+
+				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
+				_tween = TweenService:Create(panel, info, {
+					BorderColor3 = Theme.Accent
+				})
+				_tween:Play()
+			end
+		end)
+
+		AddConnection(button.InputEnded, function(input: InputObject)
+			if input.UserInputType == Enum.UserInputType.MouseMovement then
+				if _tween then
+					_tween:Cancel()
+				end
+
+				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
+				_tween = TweenService:Create(panel, info, {
+					BorderColor3 = Theme.ElementBorder
+				})
+				_tween:Play()
+			end
+		end)
+	end
+end
+
+function Section:AddButton(name: string, properties: {[string]: any}): ()
+	properties = properties or {}
+	local callback = properties.Callback or function() end
+	
+	local frame = Instance.new("Frame")
+	frame.Parent = self.objects.elements
+	frame.BackgroundTransparency = 1
+	frame.Size = UDim2.new(1, 0, 0, 32)
+	
+	local button = Instance.new("ImageButton")
+	button.Parent = frame
+	button.AnchorPoint = Vector2.new(0.5, 0.5)
+	button.AutoButtonColor = false
+	button.BackgroundColor3 = Theme.ButtonBackground
+	button.BorderColor3 = Theme.ElementBorder
+	button.BorderMode = Enum.BorderMode.Inset
+	button.BorderSizePixel = 1
+	button.Position = UDim2.fromScale(0.5, 0.5)
+	button.Size = UDim2.new(1, -16, 0, 24)
+	button.Image= ""
+	
+	AddGradientFrame(button, {Color3.fromRGB(0, 0, 0)}, {0.6, 1}, -90)
+	
+	local text = Instance.new("TextLabel")
+	text.Parent = button
+	text.BackgroundTransparency = 1
+	text.Size = UDim2.fromScale(1, 1)
+	text.Font = Enum.Font.Code
+	text.Font = Enum.Font.Code
+	text.Text = name
+	text.TextColor3 = Theme.ButtonText
+	text.TextSize = 14
+	text.TextXAlignment = Enum.TextXAlignment.Center
+	text.TextTruncate = Enum.TextTruncate.AtEnd
+	
+	AddConnection(button.Activated, function()
+		callback()
+	end)
+	
+	do -- ホールド時のアニメーション
+		local _tween = nil
+
+		AddConnection(button.InputBegan, function(input: InputObject)
+			if input.UserInputType == Enum.UserInputType.MouseMovement then
+				if _tween then
+					_tween:Cancel()
+				end
+
+				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
+				_tween = TweenService:Create(button, info, {
+					BorderColor3 = Theme.Accent
+				})
+				_tween:Play()
+			end
+		end)
+
+		AddConnection(button.InputEnded, function(input: InputObject)
+			if input.UserInputType == Enum.UserInputType.MouseMovement then
+				if _tween then
+					_tween:Cancel()
+				end
+
+				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
+				_tween = TweenService:Create(button, info, {
+					BorderColor3 = Theme.ElementBorder
+				})
+				_tween:Play()
 			end
 		end)
 	end
