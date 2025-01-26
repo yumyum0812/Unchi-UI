@@ -132,7 +132,7 @@ end
 
 function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typeof(Window)
 	properties = properties or {}
-	local width = properties.Width or 440
+	local width = properties.Width or 450
 	local height = properties.Height or 520
 	
 	local window = setmetatable({}, Window)
