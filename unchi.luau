@@ -5,14 +5,14 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
-local CoreGui = game:GetService("CoreGui")
 
 -- テーマ
 local Theme = {
 	Accent = Color3.fromRGB(176, 79, 255),
 	Text = Color3.fromRGB(240, 240, 240),
 	WindowBackground = Color3.fromRGB(36, 36, 36),
-	WindowBorder = Color3.fromRGB(83, 83, 83),
+	WindowBorderInner = Color3.fromRGB(83, 83, 83),
+	WindowBorderOuter = Color3.fromRGB(30, 30, 30),
 	TabText = Color3.fromRGB(128, 128, 128),
 	TabBackground = Color3.fromRGB(42, 42, 42),
 	TabBorderInner =  Color3.fromRGB(22, 22, 22),
@@ -42,32 +42,39 @@ Tab.__index = Tab
 local Window = {}
 Window.__index = Window
 
+--
+
+local function GetCoreGui(): ()
+	return game:GetService("CoreGui")
+end
+
+local function GetHiddenGui(): ()
+	local env = getfenv()
+	local wrapped = env.gethui or GetCoreGui
+	return wrapped()
+end
+
+local function TryProtectGui(): ()
+	local env = getfenv()
+	if env.syn and env.syn.protect_gui then
+		env.syn.protect_gui(gui)
+	end
+end
+
 -- 初期化
 do
 	gui = Instance.new("ScreenGui")
-	
-	local global = getfenv()
-	
-	if global.syn and global.syn.protect_gui then
-		global.syn.protect_gui(gui)
-	end
-	
-	if global.gethui then
-		gui.Parent = global.gethui()
-	else
-		local success = pcall(function()
-			gui.Parent = CoreGui
-		end)
-		
-		if not success then
-			gui.Parent = Players.LocalPlayer.PlayerGui
-		end
-	end
-	
-	gui.Name = "UnchiUI"
+	gui.Name = "Unchi"
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = false
 	gui.AutoLocalize = false
+	
+	if RunService:IsStudio() then
+		gui.Parent = Players.LocalPlayer.PlayerGui
+	else
+		gui.Parent = GetHiddenGui()
+		TryProtectGui(gui)
+	end
 end
 
 local function AddConnection(signal: RBXScriptSignal, callback: any): ()
@@ -82,44 +89,69 @@ local function ClearConnections(): ()
 	end
 end
 
-local function AddGradientFrame(object: GuiBase, colors: {Color3}?, transparencies: {number}?, rotation: number?): UIGradient
-	colors = colors or {Color3.fromRGB(255, 255, 255)}
-	transparencies = transparencies or {0}
+local function AddGradientFrame(object: GuiBase, colors: Color3 | {Color3}, transparencies: (number | {number})?, rotation: number?, sizeOffset: number?): UIGradient
+	transparencies = transparencies or 0
 	rotation = rotation or 0
+	sizeOffset = sizeOffset or 0
 	
 	local frame = Instance.new("Frame")
 	frame.Parent = object
+	frame.AnchorPoint = Vector2.new(0.5, 0.5)
 	frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	frame.BorderSizePixel = 0
-	frame.Size = UDim2.fromScale(1, 1)
+	frame.Position = UDim2.fromScale(0.5, 0.5)
+	frame.Size = UDim2.new(1, sizeOffset * 2, 1, sizeOffset * 2)
 	
 	local uiGradient = Instance.new("UIGradient")
 	uiGradient.Parent = frame
 	uiGradient.Rotation = rotation
 	
-	if #colors > 1 then
+	if typeof(colors) == "Color3" then
+		uiGradient.Color = ColorSequence.new(colors)
+	else
 		local keypoints = {}
 		for i, color in colors do
 			local point = ColorSequenceKeypoint.new((i - 1) / (#colors - 1), color)
 			table.insert(keypoints, point)
 		end
 		uiGradient.Color = ColorSequence.new(keypoints)
-	else
-		uiGradient.Color = ColorSequence.new(colors[1])
 	end
 	
-	if #transparencies > 1 then
+	if typeof(transparencies) == "number" then
+		uiGradient.Transparency = NumberSequence.new(transparencies)
+	else
 		local keypoints = {}
 		for i, transparency in transparencies do
 			local point = NumberSequenceKeypoint.new((i - 1) / (#transparencies - 1), transparency)
 			table.insert(keypoints, point)
 		end
 		uiGradient.Transparency = NumberSequence.new(keypoints)
-	else
-		uiGradient.Transparency = NumberSequence.new(transparencies[1])
 	end
 	
 	return uiGradient
+end
+
+local function AddBorderFrame(object: GuiBase, color: Color3, thickness: number, sizeOffset: number?): ()
+	sizeOffset = sizeOffset or 0
+	
+	local frame = Instance.new("Frame")
+	frame.Parent = object
+	frame.AnchorPoint = Vector2.new(0.5, 0.5)
+	frame.BackgroundTransparency = 1
+	frame.BorderSizePixel = 0
+	frame.Size = UDim2.new(1, sizeOffset * 2, 1, sizeOffset * 2)
+	frame.Position = UDim2.fromScale(0.5, 0.5)
+	
+	local uiStroke = Instance.new("UIStroke")
+	uiStroke.Parent = frame
+	uiStroke.Enabled = true
+	uiStroke.Color = color
+	uiStroke.Transparency = 0
+	uiStroke.Thickness = thickness
+	uiStroke.LineJoinMode = Enum.LineJoinMode.Miter
+	uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	
+	return uiStroke
 end
 
 function UILibrary:Destroy(): ()
@@ -152,25 +184,12 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	background.Parent = root
 	background.BackgroundColor3 = Theme.WindowBackground
 	background.BorderSizePixel = 0
-	background.BorderColor3 = Color3.fromRGB(20, 20, 20)
+	background.BorderColor3 = Theme.WindowBorderOuter
 	background.BorderMode = Enum.BorderMode.Inset
 	background.BorderSizePixel = 1
 	background.Size = UDim2.fromScale(1, 1)
 	
-	local outline = Instance.new("Frame")
-	outline.Parent = root
-	outline.BackgroundTransparency = 1
-	outline.AnchorPoint = Vector2.new(0.5, 0.5)
-	outline.Position = UDim2.fromScale(0.5, 0.5)
-	outline.Size = UDim2.new(1, -4, 1, -4)
-
-	local stroke = Instance.new("UIStroke")
-	stroke.Parent = outline
-	stroke.Enabled = true
-	stroke.Color = Theme.WindowBorder
-	stroke.Thickness = 1
-	stroke.LineJoinMode = Enum.LineJoinMode.Miter
-	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	AddBorderFrame(root, Theme.WindowBorderInner, 1, -2)
 	
 	local handle = Instance.new("Frame")
 	handle.Parent = root
@@ -183,7 +202,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	title.AnchorPoint = Vector2.new(0.5, 0)
 	title.BackgroundTransparency = 1
 	title.Position = UDim2.new(0.5, 0, 0, 10)
-	title.Size = UDim2.new(1, -24, 0, 12)
+	title.Size = UDim2.new(1, -24, 0, 14)
 	title.Font = Enum.Font.Code
 	title.Text = name
 	title.TextColor3 = Theme.Accent
@@ -195,8 +214,8 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	tabs.Parent = root
 	tabs.AnchorPoint = Vector2.new(0.5, 0)
 	tabs.BackgroundTransparency = 1
-	tabs.Position = UDim2.new(0.5, 0, 0, 28)
-	tabs.Size = UDim2.new(1, -16, 0, 26)
+	tabs.Position = UDim2.new(0.5, 0, 0, 30)
+	tabs.Size = UDim2.new(1, -16, 0, 28)
 	tabs.ScrollBarThickness = 0
 	tabs.ScrollingDirection = Enum.ScrollingDirection.X
 	tabs.CanvasSize = UDim2.new()
@@ -208,13 +227,13 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	tabsHolder.BackgroundTransparency = 1
 	tabsHolder.Size = UDim2.fromScale(0, 1)
 	
-	local tabSlider = Instance.new("Frame")
-	tabSlider.Parent = tabs
-	tabSlider.AnchorPoint = Vector2.new(0.5, 1)
-	tabSlider.BackgroundColor3 = Theme.Accent
-	tabSlider.BorderSizePixel = 0
-	tabSlider.Position = UDim2.new()
-	tabSlider.Size = UDim2.new()
+	local tabLine = Instance.new("Frame")
+	tabLine.Parent = tabs
+	tabLine.AnchorPoint = Vector2.new(0.5, 1)
+	tabLine.BackgroundColor3 = Theme.Accent
+	tabLine.BorderSizePixel = 0
+	tabLine.Position = UDim2.new()
+	tabLine.Size = UDim2.new()
 
 	local uiList = Instance.new("UIListLayout")
 	uiList.Parent = tabsHolder
@@ -227,7 +246,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	tabSections.AnchorPoint = Vector2.new(0.5, 1)
 	tabSections.BackgroundTransparency = 1
 	tabSections.Position = UDim2.new(0.5, 0, 1, -8)
-	tabSections.Size = UDim2.new(1, -16, 1, -64)
+	tabSections.Size = UDim2.new(1, -16, 1, -66)
 	
 	local tabSectionsBg = Instance.new("Frame")
 	tabSectionsBg.Parent = tabSections
@@ -257,7 +276,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	window.objects.root = root
 	window.objects.tabs = tabsHolder
 	window.objects.tabSections = tabSections
-	window.objects.tabSlider = tabSlider
+	window.objects.tabLine = tabLine
 	
 	do -- ドラッグ対応
 		local _input = nil
@@ -292,25 +311,20 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		local picker = Instance.new("Frame")
 		picker.Parent = root
 		picker.AnchorPoint = Vector2.new(0.5, 0)
-		picker.BackgroundColor3 = Theme.WindowBackground
-		picker.BorderSizePixel = 0
+		picker.BackgroundTransparency = 1
 		picker.Position = UDim2.fromOffset(-4, 0)
 		picker.Size = UDim2.fromOffset(220, 220)
 		picker.Visible = false
 		
-		local outline = Instance.new("Frame")
-		outline.Parent = picker
-		outline.AnchorPoint = Vector2.new(0.5, 0.5)
-		outline.BackgroundTransparency = 1
-		outline.Position = UDim2.fromScale(0.5, 0.5)
-		outline.Size = UDim2.new(1, -4, 1, -4)
+		local background = Instance.new("Frame")
+		background.Parent = picker
+		background.BackgroundColor3 = Theme.WindowBackground
+		background.BorderColor3 = Theme.WindowBorderOuter
+		background.BorderMode = Enum.BorderMode.Inset
+		background.BorderSizePixel = 1
+		background.Size = UDim2.fromScale(1, 1)
 		
-		local uiStroke = Instance.new("UIStroke")
-		uiStroke.Parent = outline
-		uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-		uiStroke.Color = Theme.WindowBorder
-		uiStroke.LineJoinMode = Enum.LineJoinMode.Miter
-		uiStroke.Thickness = 1
+		AddBorderFrame(picker, Theme.WindowBorderInner, 1, -2)
 		
 		local svPanel = Instance.new("ImageButton")
 		svPanel.Parent = picker
@@ -322,8 +336,8 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		svPanel.Size = UDim2.fromOffset(180, 180)
 		svPanel.Image = ""
 		
-		AddGradientFrame(svPanel, {Color3.fromRGB(255, 255, 255)}, {0, 1}, 0)
-		AddGradientFrame(svPanel, {Color3.fromRGB(0, 0, 0)}, {0, 1}, -90)
+		AddGradientFrame(svPanel, Color3.fromRGB(255, 255, 255), {0, 1}, 0)
+		AddGradientFrame(svPanel, Color3.fromRGB(0, 0, 0), {0, 1}, -90)
 		
 		local huePanel = Instance.new("ImageButton")
 		huePanel.Parent = picker
@@ -349,7 +363,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		svHandle.Parent = svPanel
 		svHandle.AnchorPoint = Vector2.new(0.5, 0.5)
 		svHandle.BackgroundColor3 = Theme.WindowBackground
-		svHandle.BorderColor3 = Theme.WindowBorder
+		svHandle.BorderColor3 = Theme.WindowBorderInner
 		svHandle.BorderMode = Enum.BorderMode.Inset
 		svHandle.BorderSizePixel = 1
 		svHandle.Position = UDim2.fromScale(0, 0)
@@ -359,7 +373,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		hueHandle.Parent = huePanel
 		hueHandle.AnchorPoint = Vector2.new(0.5, 0.5)
 		hueHandle.BackgroundColor3 = Theme.WindowBackground
-		hueHandle.BorderColor3 = Theme.WindowBorder
+		hueHandle.BorderColor3 = Theme.WindowBorderInner
 		hueHandle.BorderMode = Enum.BorderMode.Inset
 		hueHandle.BorderSizePixel = 1
 		hueHandle.Position = UDim2.fromScale(0.5, 0)
@@ -530,8 +544,8 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = button
-	uiPadding.PaddingLeft = UDim.new(0, 20)
-	uiPadding.PaddingRight = UDim.new(0, 20)
+	uiPadding.PaddingLeft = UDim.new(0, 16)
+	uiPadding.PaddingRight = UDim.new(0, 16)
 	
 	local sections = Instance.new("Frame")
 	sections.Parent = self.objects.tabSections
@@ -600,15 +614,15 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 		
 		if tab.selected then
 			if instant then
-				self.objects.tabSlider.Position = UDim2.new(0, button.AbsolutePosition.X - self.objects.tabs.AbsolutePosition.X + button.AbsoluteSize.X / 2, 1, 0)
-				self.objects.tabSlider.Size = UDim2.fromOffset(button.AbsoluteSize.X, 1)
+				self.objects.tabLine.Position = UDim2.new(0, button.AbsolutePosition.X - self.objects.tabs.AbsolutePosition.X + button.AbsoluteSize.X / 2, 1, 0)
+				self.objects.tabLine.Size = UDim2.fromOffset(button.AbsoluteSize.X, 1)
 			else
 				if _tween then
 					_tween:Cancel()
 				end
 				
 				local info = TweenInfo.new(0.2, Enum.EasingStyle.Sine)
-				_tween = TweenService:Create(self.objects.tabSlider, info, {
+				_tween = TweenService:Create(self.objects.tabLine, info, {
 					Position = UDim2.new(0, button.AbsolutePosition.X - self.objects.tabs.AbsolutePosition.X + button.AbsoluteSize.X / 2, 1, 0),
 					Size = UDim2.fromOffset(button.AbsoluteSize.X, 1)
 				})
@@ -695,25 +709,24 @@ function Tab:CreateSection(properties: {[string]: any}): typeof(Section)
 	section.objects = {}
 	table.insert(self.sections, section)
 
-	local frame = Instance.new("Frame")
-	frame.Parent = rightSide and self.objects.sectionsR or self.objects.sectionsL
-	frame.BackgroundColor3 = Theme.SectionBorderOuter
-	frame.BorderSizePixel = 0
-	frame.AutomaticSize = Enum.AutomaticSize.Y
-	frame.Size = UDim2.fromScale(1, 0)
+	local root = Instance.new("Frame")
+	root.Parent = rightSide and self.objects.sectionsR or self.objects.sectionsL
+	root.BackgroundTransparency = 1
+	root.AutomaticSize = Enum.AutomaticSize.Y
+	root.Size = UDim2.fromScale(1, 0)
 	
 	local background = Instance.new("Frame")
-	background.Parent = frame
+	background.Parent = root
 	background.BackgroundColor3 = Theme.SectionBackground
-	background.BorderColor3 = Theme.SectionBorderInner
+	background.BorderColor3 = Theme.SectionBorderOuter
 	background.BorderMode = Enum.BorderMode.Inset
 	background.BorderSizePixel = 1
-	background.AnchorPoint = Vector2.new(0.5, 0.5)
-	background.Position = UDim2.fromScale(0.5, 0.5)
-	background.Size = UDim2.new(1, -2, 1, -2)
+	background.Size = UDim2.fromScale(1, 1)
+	
+	AddBorderFrame(root, Theme.SectionBorderInner, 1, -2)
 
 	local line = Instance.new("Frame")
-	line.Parent = frame
+	line.Parent = root
 	line.AnchorPoint = Vector2.new(0.5, 0)
 	line.BackgroundColor3 = Theme.Accent
 	line.BorderSizePixel = 0
@@ -721,11 +734,11 @@ function Tab:CreateSection(properties: {[string]: any}): typeof(Section)
 	line.Size = UDim2.new(1, -2, 0, 1)
 
 	local textSpace = Instance.new("Frame")
-	textSpace.Parent = frame
+	textSpace.Parent = root
 	textSpace.AutomaticSize = Enum.AutomaticSize.X
 	textSpace.BackgroundTransparency = 1
 	textSpace.BorderSizePixel = 0
-	textSpace.Position = UDim2.fromOffset(10, -1)
+	textSpace.Position = UDim2.fromOffset(12, -1)
 	textSpace.Size = UDim2.fromOffset(0, 1)
 
 	local fill = Instance.new("Frame")
@@ -753,7 +766,7 @@ function Tab:CreateSection(properties: {[string]: any}): typeof(Section)
 	uiPadding.PaddingRight = UDim.new(0, 8)
 
 	local elements = Instance.new("Frame")
-	elements.Parent = frame
+	elements.Parent = root
 	elements.BackgroundTransparency = 1
 	elements.BorderSizePixel = 0
 	elements.Position = UDim2.new()
@@ -802,27 +815,26 @@ function Section:AddToggle(properties: {[string]: any}?): ()
 	local switch = Instance.new("Frame")
 	switch.Parent = button
 	switch.AnchorPoint = Vector2.new(0, 0.5)
-	switch.BackgroundColor3 = Theme.ElementBorderOuter
-	switch.BorderSizePixel = 0
+	switch.BackgroundTransparency = 1
 	switch.Position = UDim2.new(0, 8, 0.5, 0)
 	switch.Size = UDim2.fromOffset(14, 14)
 	
-	local background = Instance.new("Frame")
-	background.Parent = switch
-	background.BackgroundColor3 = Theme.ElementBackground
-	background.BorderColor3 = Theme.ElementBorderInner
-	background.BorderMode = Enum.BorderMode.Inset
-	background.BorderSizePixel = 1
-	background.AnchorPoint = Vector2.new(0.5, 0.5)
-	background.Position = UDim2.fromScale(0.5, 0.5)
-	background.Size = UDim2.new(1, -2, 1, -2)
+	local switchBg = Instance.new("Frame")
+	switchBg.Parent = switch
+	switchBg.BackgroundColor3 = Theme.ElementBackground
+	switchBg.BorderColor3 = Theme.ElementBorderOuter
+	switchBg.BorderMode = Enum.BorderMode.Inset
+	switchBg.BorderSizePixel = 1
+	switchBg.Size = UDim2.fromScale(1, 1)
+	
+	local innerBorder = AddBorderFrame(switch, Theme.ElementBorderInner, 1, -2)
 
 	local coreHolder = Instance.new("Frame")
-	coreHolder.Parent = background
+	coreHolder.Parent = switchBg
 	coreHolder.AnchorPoint = Vector2.new(0.5, 0.5)
 	coreHolder.BackgroundTransparency = 1
 	coreHolder.Position = UDim2.fromScale(0.5, 0.5)
-	coreHolder.Size = UDim2.new(1, -2, 1, -2)
+	coreHolder.Size = UDim2.new(1, -4, 1, -4)
 
 	local core = Instance.new("Frame")
 	core.Parent = coreHolder
@@ -832,7 +844,7 @@ function Section:AddToggle(properties: {[string]: any}?): ()
 	core.Position = UDim2.fromScale(0.5, 0.5)
 	core.Size = UDim2.fromScale(1, 1)
 	
-	AddGradientFrame(core, {Color3.fromRGB(0, 0, 0)}, {0.6, 1}, -90)
+	AddGradientFrame(core, Color3.fromRGB(0, 0, 0), {0.6, 1}, -90)
 
 	do
 		local _value = properties.Value or false
@@ -873,8 +885,8 @@ function Section:AddToggle(properties: {[string]: any}?): ()
 			end
 
 			local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
-			_tween = TweenService:Create(background, info, {
-				BorderColor3 = hold and Theme.Accent or Theme.ElementBorderInner
+			_tween = TweenService:Create(innerBorder, info, {
+				Color = hold and Theme.Accent or Theme.ElementBorderInner
 			})
 			_tween:Play()
 		end
@@ -941,28 +953,30 @@ function Section:AddSlider(properties: {[string]: any}?): ()
 	slider.Selectable = true
 	slider.AutoButtonColor = false
 	slider.AnchorPoint = Vector2.new(0.5, 1)
-	slider.Image = ""
 	slider.BackgroundColor3 = Theme.ElementBorderOuter
 	slider.BorderSizePixel = 0
 	slider.Position = UDim2.new(0.5, 0, 1, -4)
 	slider.Size = UDim2.new(1, -16, 0, 20)
+	slider.Image = ""
 	
-	local background = Instance.new("Frame")
-	background.Parent = slider
-	background.BackgroundColor3 = Theme.ElementBackground
-	background.BorderColor3 = Theme.ElementBorderInner
-	background.BorderMode = Enum.BorderMode.Inset
-	background.BorderSizePixel = 1
-	background.AnchorPoint = Vector2.new(0.5, 0.5)
-	background.Position = UDim2.fromScale(0.5, 0.5)
-	background.Size = UDim2.new(1, -2, 1, -2)
+	local sliderBg = Instance.new("Frame")
+	sliderBg.Parent = slider
+	sliderBg.BackgroundColor3 = Theme.ElementBackground
+	sliderBg.BorderColor3 = Theme.ElementBorderOuter
+	sliderBg.BorderMode = Enum.BorderMode.Inset
+	sliderBg.BorderSizePixel = 1
+	sliderBg.AnchorPoint = Vector2.new(0.5, 0.5)
+	sliderBg.Position = UDim2.fromScale(0.5, 0.5)
+	sliderBg.Size = UDim2.fromScale(1, 1)
+	
+	local innerBorder = AddBorderFrame(slider, Theme.ElementBorderInner, 1, -2)
 	
 	local progressHolder = Instance.new("Frame")
-	progressHolder.Parent = background
+	progressHolder.Parent = slider
 	progressHolder.AnchorPoint = Vector2.new(0.5, 0.5)
 	progressHolder.BackgroundTransparency = 1
 	progressHolder.Position = UDim2.fromScale(0.5, 0.5)
-	progressHolder.Size = UDim2.new(1, -2, 1, -2)
+	progressHolder.Size = UDim2.new(1, -6, 1, -6)
 
 	local progress = Instance.new("Frame")
 	progress.Parent = progressHolder
@@ -971,7 +985,7 @@ function Section:AddSlider(properties: {[string]: any}?): ()
 	progress.Position = UDim2.new()
 	progress.Size = UDim2.new(1, 0, 1, 0)
 
-	AddGradientFrame(progress, {Color3.fromRGB(0, 0, 0)}, {0.6, 1}, -90)
+	AddGradientFrame(progress, Color3.fromRGB(0, 0, 0), {0.6, 1}, -90)
 
 	do
 		local range = max - min
@@ -1047,8 +1061,8 @@ function Section:AddSlider(properties: {[string]: any}?): ()
 			end
 
 			local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
-			_tween = TweenService:Create(background, info, {
-				BorderColor3 = hold and Theme.Accent or Theme.ElementBorderInner
+			_tween = TweenService:Create(innerBorder, info, {
+				Color = hold and Theme.Accent or Theme.ElementBorderInner
 			})
 			_tween:Play()
 		end
@@ -1093,43 +1107,32 @@ function Section:AddColor(properties: {[string]: any}?): ()
 	button.Size = UDim2.new(1, 0, 0, 22)
 	button.Image = ""
 
-	local background = Instance.new("Frame")
-	background.Parent = button
-	background.AnchorPoint = Vector2.new(1, 0.5)
-	background.BackgroundColor3 = Theme.ElementBorderOuter
-	background.BorderSizePixel = 0
-	background.Position = UDim2.new(1, -8, 0.5, 0)
-	background.Size = UDim2.fromOffset(24, 16)
+	local panelRoot = Instance.new("Frame")
+	panelRoot.Parent = button
+	panelRoot.AnchorPoint = Vector2.new(1, 0.5)
+	panelRoot.BackgroundTransparency = 1
+	panelRoot.Position = UDim2.new(1, -8, 0.5, 0)
+	panelRoot.Size = UDim2.fromOffset(24, 16)
 	
-	local panelHolder = Instance.new("Frame")
-	panelHolder.Parent = background
-	panelHolder.BackgroundColor3 = Theme.ElementBackground
-	panelHolder.BorderColor3 = Theme.ElementBorderInner
-	panelHolder.BorderMode = Enum.BorderMode.Inset
-	panelHolder.BorderSizePixel = 1
-	panelHolder.AnchorPoint = Vector2.new(0.5, 0.5)
-	panelHolder.Position = UDim2.fromScale(0.5, 0.5)
-	panelHolder.Size = UDim2.new(1, -2, 1, -2)
+	local panelBg = Instance.new("Frame")
+	panelBg.Parent = panelRoot
+	panelBg.BackgroundColor3 = Theme.ElementBackground
+	panelBg.BorderColor3 = Theme.ElementBorderOuter
+	panelBg.BorderMode = Enum.BorderMode.Inset
+	panelBg.BorderSizePixel = 1
+	panelBg.Size = UDim2.fromScale(1, 1)
+	
+	local innerBorder = AddBorderFrame(panelRoot, Theme.ElementBorderInner, 1, -2)
 	
 	local panel = Instance.new("Frame")
-	panel.Parent = panelHolder
+	panel.Parent = panelRoot
 	panel.BackgroundColor3 = defaultValue
 	panel.BorderSizePixel = 0
 	panel.AnchorPoint = Vector2.new(0.5, 0.5)
 	panel.Position = UDim2.fromScale(0.5, 0.5)
-	panel.Size = UDim2.new(1, -2, 1, -2)
+	panel.Size = UDim2.new(1, -6, 1, -6)
 
-	local gradient = Instance.new("Frame")
-	gradient.Parent = panel
-	gradient.BorderSizePixel = 0
-	gradient.Position = UDim2.new()
-	gradient.Size = UDim2.fromScale(1, 1)
-
-	local uiGradient = Instance.new("UIGradient")
-	uiGradient.Parent = gradient
-	uiGradient.Rotation = -90
-	uiGradient.Color = ColorSequence.new(Color3.fromRGB(0, 0, 0))
-	uiGradient.Transparency = NumberSequence.new(0.6, 1)
+	AddGradientFrame(panel, Color3.fromRGB(0, 0, 0), {0.6, 1}, -90)
 
 	local text = Instance.new("TextLabel")
 	text.Parent = button
@@ -1192,8 +1195,8 @@ function Section:AddColor(properties: {[string]: any}?): ()
 			end
 
 			local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
-			_tween = TweenService:Create(panelHolder, info, {
-				BorderColor3 = hold and Theme.Accent or Theme.ElementBorderInner
+			_tween = TweenService:Create(innerBorder, info, {
+				Color = hold and Theme.Accent or Theme.ElementBorderInner
 			})
 			_tween:Play()
 		end
@@ -1239,26 +1242,25 @@ function Section:AddButton(properties: {[string]: any}): ()
 	button.Parent = frame
 	button.AnchorPoint = Vector2.new(0.5, 0.5)
 	button.AutoButtonColor = false
-	button.BackgroundColor3 = Theme.ElementBorderOuter
-	button.BorderSizePixel = 0
+	button.BackgroundTransparency = 1
 	button.Position = UDim2.fromScale(0.5, 0.5)
 	button.Size = UDim2.new(1, -16, 0, 26)
-	button.Image= ""
+	button.Image = ""
 	
-	local background = Instance.new("Frame")
-	background.Parent = button
-	background.AnchorPoint = Vector2.new(0.5, 0.5)
-	background.BackgroundColor3 = Theme.ButtonBackground
-	background.BorderColor3 = Theme.ElementBorderInner
-	background.BorderMode = Enum.BorderMode.Inset
-	background.BorderSizePixel = 1
-	background.Position = UDim2.fromScale(0.5, 0.5)
-	background.Size = UDim2.new(1, -2, 1, -2)
+	local buttonBg = Instance.new("Frame")
+	buttonBg.Parent = button
+	buttonBg.BackgroundColor3 = Theme.ButtonBackground
+	buttonBg.BorderColor3 = Theme.ElementBorderOuter
+	buttonBg.BorderMode = Enum.BorderMode.Inset
+	buttonBg.BorderSizePixel = 1
+	buttonBg.Size = UDim2.fromScale(1, 1)
 	
-	AddGradientFrame(background, {Color3.fromRGB(0, 0, 0)}, {0.6, 1}, -90)
+	local innerBorder = AddBorderFrame(button, Theme.ElementBorderInner, 1, -2)
+	
+	AddGradientFrame(button, Color3.fromRGB(0, 0, 0), {0.6, 1}, -90, -2)
 	
 	local text = Instance.new("TextLabel")
-	text.Parent = background
+	text.Parent = button
 	text.BackgroundTransparency = 1
 	text.Size = UDim2.fromScale(1, 1)
 	text.Font = Enum.Font.Code
@@ -1284,8 +1286,8 @@ function Section:AddButton(properties: {[string]: any}): ()
 			end
 
 			local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
-			_tween = TweenService:Create(background, info, {
-				BorderColor3 = hold and Theme.Accent or Theme.ElementBorderInner
+			_tween = TweenService:Create(innerBorder, info, {
+				Color = hold and Theme.Accent or Theme.ElementBorderInner
 			})
 			_tween:Play()
 		end
@@ -1345,47 +1347,46 @@ function Section:AddKeybind(properties: {[string]: any}): ()
 	button.Parent = frame
 	button.AnchorPoint = Vector2.new(0.5, 0)
 	button.AutoButtonColor = false
-	button.BackgroundColor3 = Theme.ElementBorderOuter
-	button.BorderSizePixel = 0
+	button.BackgroundTransparency = 1
 	button.Position = UDim2.new(0.5, 0, 0, 24)
 	button.Size = UDim2.new(1, -16, 0, 26)
-	button.Image= ""
+	button.Image = ""
 
-	local background = Instance.new("Frame")
-	background.Parent = button
-	background.AnchorPoint = Vector2.new(0.5, 0.5)
-	background.BackgroundColor3 = Theme.ButtonBackground
-	background.BorderColor3 = Theme.ElementBorderInner
-	background.BorderMode = Enum.BorderMode.Inset
-	background.BorderSizePixel = 1
-	background.Position = UDim2.fromScale(0.5, 0.5)
-	background.Size = UDim2.new(1, -2, 1, -2)
+	local buttonBg = Instance.new("Frame")
+	buttonBg.Parent = button
+	buttonBg.BackgroundColor3 = Theme.ButtonBackground
+	buttonBg.BorderColor3 = Theme.ElementBorderOuter
+	buttonBg.BorderMode = Enum.BorderMode.Inset
+	buttonBg.BorderSizePixel = 1
+	buttonBg.Size = UDim2.fromScale(1, 1)
 
-	AddGradientFrame(background, {Color3.fromRGB(0, 0, 0)}, {0.6, 1}, -90)
+	local innerBorder = AddBorderFrame(button, Theme.ElementBorderInner, 1, -2)
 
-	local text = Instance.new("TextLabel")
-	text.Parent = background
-	text.BackgroundTransparency = 1
-	text.Size = UDim2.fromScale(1, 1)
-	text.Font = Enum.Font.Code
-	text.Font = Enum.Font.Code
-	text.Text = ""
-	text.TextColor3 = Theme.ButtonText
-	text.TextSize = 14
-	text.TextXAlignment = Enum.TextXAlignment.Center
-	text.TextTruncate = Enum.TextTruncate.AtEnd
+	AddGradientFrame(button, Color3.fromRGB(0, 0, 0), {0.6, 1}, -90, -2)
+
+	local buttonText = Instance.new("TextLabel")
+	buttonText.Parent = button
+	buttonText.BackgroundTransparency = 1
+	buttonText.Size = UDim2.fromScale(1, 1)
+	buttonText.Font = Enum.Font.Code
+	buttonText.Font = Enum.Font.Code
+	buttonText.Text = name
+	buttonText.TextColor3 = Theme.ButtonText
+	buttonText.TextSize = 14
+	buttonText.TextXAlignment = Enum.TextXAlignment.Center
+	buttonText.TextTruncate = Enum.TextTruncate.AtEnd
 
 	do -- 実装
 		local _value = defaultValue
 		local _waitForInput = false
 		
 		local function updateVisual()
-			text.Text = _value and _value.Name or "-"
+			buttonText.Text = _value and _value.Name or "---"
 		end
 		
 		AddConnection(button.Activated, function()
 			_waitForInput = true
-			text.Text = "..."
+			buttonText.Text = "..."
 			callback(nil)
 		end)
 		
@@ -1403,7 +1404,6 @@ function Section:AddKeybind(properties: {[string]: any}): ()
 				
 				updateVisual()
 				
-				task.wait()
 				callback(_value)
 			end
 		end)
@@ -1422,8 +1422,8 @@ function Section:AddKeybind(properties: {[string]: any}): ()
 			end
 
 			local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
-			_tween = TweenService:Create(background, info, {
-				BorderColor3 = hold and Theme.Accent or Theme.ElementBorderInner
+			_tween = TweenService:Create(innerBorder, info, {
+				Color = hold and Theme.Accent or Theme.ElementBorderInner
 			})
 			_tween:Play()
 		end
