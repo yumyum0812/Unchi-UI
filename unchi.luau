@@ -130,8 +130,8 @@ function UILibrary:Destroy(): ()
 	windows = {}
 end
 
-function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typeof(Window)
-	properties = properties or {}
+function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
+	local name = properties.Name
 	local width = properties.Width or 450
 	local height = properties.Height or 520
 	
@@ -181,8 +181,8 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 	title.Parent = root
 	title.AnchorPoint = Vector2.new(0.5, 0)
 	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0.5, 0, 0, 12)
-	title.Size = UDim2.new(1, -24, 0, 14)
+	title.Position = UDim2.new(0.5, 0, 0, 10)
+	title.Size = UDim2.new(1, -24, 0, 12)
 	title.Font = Enum.Font.Code
 	title.Text = name
 	title.TextColor3 = Theme.Accent
@@ -194,7 +194,7 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 	tabs.Parent = root
 	tabs.AnchorPoint = Vector2.new(0.5, 0)
 	tabs.BackgroundTransparency = 1
-	tabs.Position = UDim2.new(0.5, 0, 0, 36)
+	tabs.Position = UDim2.new(0.5, 0, 0, 28)
 	tabs.Size = UDim2.new(1, -16, 0, 26)
 	tabs.ScrollBarThickness = 0
 	tabs.ScrollingDirection = Enum.ScrollingDirection.X
@@ -226,7 +226,7 @@ function UILibrary:CreateWindow(name: string, properties: {[string]: any}?): typ
 	tabSections.AnchorPoint = Vector2.new(0.5, 1)
 	tabSections.BackgroundTransparency = 1
 	tabSections.Position = UDim2.new(0.5, 0, 1, -8)
-	tabSections.Size = UDim2.new(1, -16, 1, -72)
+	tabSections.Size = UDim2.new(1, -16, 1, -64)
 	
 	local tabSectionsBg = Instance.new("Frame")
 	tabSectionsBg.Parent = tabSections
@@ -507,8 +507,8 @@ function Window:SetVisible(visible: boolean): ()
 	self.objects.root.Visible = visible
 end
 
-function Window:CreateTab(name: string, properties: {[string]: any}?): typeof(Tab)
-	properties = properties or {}
+function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
+	local name = properties.Name
 	
 	local tab = setmetatable({}, Tab)
 	tab.window = self
@@ -685,8 +685,9 @@ function Window:CreateTab(name: string, properties: {[string]: any}?): typeof(Ta
 	return tab
 end
 
-function Tab:CreateSection(name: string, right: boolean?): typeof(Section)
-	right = right or false
+function Tab:CreateSection(properties: {[string]: any}): typeof(Section)
+	local name = properties.Name
+	local rightSide = properties.RightSide
 	
 	local section = setmetatable({}, Section)
 	section.tab = self
@@ -694,7 +695,7 @@ function Tab:CreateSection(name: string, right: boolean?): typeof(Section)
 	table.insert(self.sections, section)
 
 	local frame = Instance.new("Frame")
-	frame.Parent = right and self.objects.sectionsR or self.objects.sectionsL
+	frame.Parent = rightSide and self.objects.sectionsR or self.objects.sectionsL
 	frame.BackgroundColor3 = Theme.SectionBorderOuter
 	frame.BorderSizePixel = 0
 	frame.AutomaticSize = Enum.AutomaticSize.Y
@@ -773,8 +774,8 @@ function Tab:CreateSection(name: string, right: boolean?): typeof(Section)
 	return section
 end
 
-function Section:AddToggle(name: string, properties: {[string]: any}?): ()
-	properties = properties or {}
+function Section:AddToggle(properties: {[string]: any}?): ()
+	local name = properties.Name
 	local callback = properties.Callback or function() end
 	
 	local button = Instance.new("ImageButton")
@@ -905,9 +906,8 @@ function Section:AddToggle(name: string, properties: {[string]: any}?): ()
 	end
 end
 
-function Section:AddSlider(name: string, properties: {[string]: any}?): ()
-	properties = properties or {}
-	
+function Section:AddSlider(properties: {[string]: any}?): ()
+	local name = properties.Name
 	local min = properties.Min or 0
 	local max = properties.Max or 10
 	local decimal = properties.Decimal or 0
@@ -1080,8 +1080,8 @@ function Section:AddSlider(name: string, properties: {[string]: any}?): ()
 	end
 end
 
-function Section:AddColor(name: string, properties: {[string]: any}?): ()
-	properties = properties or {}
+function Section:AddColor(properties: {[string]: any}?): ()
+	local name = properties.Name
 	local defaultValue = properties.Value or Color3.fromRGB(255, 255, 255)
 	local callback = properties.Callback or function() end
 	
@@ -1225,8 +1225,8 @@ function Section:AddColor(name: string, properties: {[string]: any}?): ()
 	end
 end
 
-function Section:AddButton(name: string, properties: {[string]: any}): ()
-	properties = properties or {}
+function Section:AddButton(properties: {[string]: any}): ()
+	local name = properties.Name
 	local callback = properties.Callback or function() end
 	
 	local frame = Instance.new("Frame")
@@ -1317,8 +1317,8 @@ function Section:AddButton(name: string, properties: {[string]: any}): ()
 	end
 end
 
-function Section:AddKeybind(name: string, properties: {[string]: any}): ()
-	properties = properties or {}
+function Section:AddKeybind(properties: {[string]: any}): ()
+	local name = properties.Name
 	local callback = properties.Callback or function() end
 	local defaultValue = properties.Value or nil
 
