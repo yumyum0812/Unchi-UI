@@ -67,6 +67,7 @@ do
 	gui.Name = "UnchiUI"
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = false
+	gui.AutoLocalize = false
 end
 
 local function AddConnection(signal: RBXScriptSignal, callback: any): ()
