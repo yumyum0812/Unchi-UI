@@ -8,7 +8,7 @@ local RunService = game:GetService("RunService")
 
 -- テーマ
 local Theme = {
-	Accent = Color3.fromRGB(176, 79, 255),
+	Accent = Color3.fromRGB(175, 62, 255),
 	Text = Color3.fromRGB(240, 240, 240),
 	WindowBackground = Color3.fromRGB(36, 36, 36),
 	WindowBorderInner = Color3.fromRGB(83, 83, 83),
