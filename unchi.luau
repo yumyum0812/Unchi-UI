@@ -53,10 +53,11 @@ local function GetHiddenGui(): ()
 	return wrapped()
 end
 
-local function TryProtectGui(): ()
+local function TryProtectGui(gui: ScreenGui): ()
 	local env = getfenv()
-	if env.syn and env.syn.protect_gui then
-		env.syn.protect_gui(gui)
+	local syn = env.syn
+	if syn and syn.protect_gui then
+		syn.protect_gui(gui)
 	end
 end
 
@@ -77,7 +78,7 @@ do
 	TryProtectGui(gui)
 end
 
-local function AddConnection(signal: RBXScriptSignal, callback: any): ()
+local function AddConnection(signal: RBXScriptSignal, callback: (any...) -> any...): ()
 	local connection = signal:Connect(callback)
 	table.insert(connections, connection)
 end
@@ -157,10 +158,10 @@ end
 function UILibrary:Destroy(): ()
 	ClearConnections()
 
+	windows = {}
+
 	gui:Destroy()
 	gui = nil
-
-	windows = {}
 end
 
 function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
@@ -308,86 +309,135 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	end
 
 	do -- カラーピッカー
-		local picker = Instance.new("Frame")
-		picker.Parent = root
-		picker.AnchorPoint = Vector2.new(0.5, 0)
-		picker.BackgroundTransparency = 1
-		picker.Position = UDim2.fromOffset(-4, 0)
-		picker.Size = UDim2.fromOffset(220, 220)
-		picker.Visible = false
+		local pickerRoot = Instance.new("Frame")
+		pickerRoot.Parent = root
+		pickerRoot.AnchorPoint = Vector2.new(0.5, 0)
+		pickerRoot.BackgroundTransparency = 1
+		pickerRoot.Position = UDim2.fromOffset(-4, 0)
+		pickerRoot.Size = UDim2.fromOffset(216, 216)
+		pickerRoot.Visible = false
 
-		local background = Instance.new("Frame")
-		background.Parent = picker
-		background.BackgroundColor3 = Theme.WindowBackground
-		background.BorderColor3 = Theme.WindowBorderOuter
-		background.BorderMode = Enum.BorderMode.Inset
-		background.BorderSizePixel = 1
-		background.Size = UDim2.fromScale(1, 1)
+		local pickerBg = Instance.new("Frame")
+		pickerBg.Parent = pickerRoot
+		pickerBg.BackgroundColor3 = Theme.SectionBackground
+		pickerBg.BorderColor3 = Theme.SectionBorderOuter
+		pickerBg.BorderMode = Enum.BorderMode.Inset
+		pickerBg.BorderSizePixel = 1
+		pickerBg.Size = UDim2.fromScale(1, 1)
 
-		AddBorderFrame(picker, Theme.WindowBorderInner, 1, -2)
+		AddBorderFrame(pickerRoot, Theme.SectionBorderInner, 1, -2)
 
-		local svPanel = Instance.new("ImageButton")
-		svPanel.Parent = picker
-		svPanel.AutoButtonColor = false
-		svPanel.BorderColor3 = Theme.TabBorderOuter
-		svPanel.BorderSizePixel = 1
-		svPanel.BorderMode = Enum.BorderMode.Inset
-		svPanel.Position = UDim2.fromOffset(6, 6)
-		svPanel.Size = UDim2.fromOffset(180, 180)
-		svPanel.Image = ""
+		local svPanelRoot = Instance.new("ImageButton")
+		svPanelRoot.Parent = pickerRoot
+		svPanelRoot.AutoButtonColor = false
+		svPanelRoot.BackgroundTransparency = 1
+		svPanelRoot.Position = UDim2.fromOffset(4, 4)
+		svPanelRoot.Size = UDim2.fromOffset(180, 180)
+		svPanelRoot.Image = ""
+
+		local svPanelBg = Instance.new("Frame")
+		svPanelBg.Parent = svPanelRoot
+		svPanelBg.BackgroundColor3 = Theme.ElementBackground
+		svPanelBg.BorderColor3 = Theme.ElementBorderOuter
+		svPanelBg.BorderMode = Enum.BorderMode.Inset
+		svPanelBg.BorderSizePixel = 1
+		svPanelBg.Size = UDim2.fromScale(1, 1)
+
+		AddBorderFrame(svPanelRoot, Theme.ElementBorderInner, 1, -2)
+
+		local svPanel = Instance.new("Frame")
+		svPanel.Parent = svPanelRoot
+		svPanel.AnchorPoint = Vector2.new(0.5, 0.5)
+		svPanel.BorderSizePixel = 0
+		svPanel.Position = UDim2.fromScale(0.5, 0.5)
+		svPanel.Size = UDim2.new(1, -6, 1, -6)
 
 		AddGradientFrame(svPanel, Color3.fromRGB(255, 255, 255), {0, 1}, 0)
 		AddGradientFrame(svPanel, Color3.fromRGB(0, 0, 0), {0, 1}, -90)
 
-		local huePanel = Instance.new("ImageButton")
-		huePanel.Parent = picker
-		huePanel.AutoButtonColor = false
-		huePanel.BorderColor3 = Theme.TabBorderOuter
-		huePanel.BorderSizePixel = 1
-		huePanel.BorderMode = Enum.BorderMode.Inset
-		huePanel.Position = UDim2.fromOffset(192, 6)
-		huePanel.Size = UDim2.fromOffset(22, 180)
-		huePanel.Image = ""
+		local huePanelRoot = Instance.new("ImageButton")
+		huePanelRoot.Parent = pickerRoot
+		huePanelRoot.AutoButtonColor = false
+		huePanelRoot.BackgroundTransparency = 1
+		huePanelRoot.Position = UDim2.fromOffset(188, 4)
+		huePanelRoot.Size = UDim2.fromOffset(24, 180)
+		huePanelRoot.Image = ""
+
+		local huePanelBg = Instance.new("Frame")
+		huePanelBg.Parent = huePanelRoot
+		huePanelBg.BackgroundColor3 = Theme.ElementBackground
+		huePanelBg.BorderColor3 = Theme.ElementBorderOuter
+		huePanelBg.BorderMode = Enum.BorderMode.Inset
+		huePanelBg.BorderSizePixel = 1
+		huePanelBg.Size = UDim2.fromScale(1, 1)
+
+		AddBorderFrame(huePanelRoot, Theme.ElementBorderInner, 1, -2)
+
+		local huePanel = Instance.new("Frame")
+		huePanel.Parent = huePanelRoot
+		huePanel.AnchorPoint = Vector2.new(0.5, 0.5)
+		huePanel.BorderSizePixel = 0
+		huePanel.Position = UDim2.fromScale(0.5, 0.5)
+		huePanel.Size = UDim2.new(1, -6, 1, -6)
 
 		AddGradientFrame(huePanel, {
-			Color3.fromRGB(255, 0, 0),
-			Color3.fromRGB(255, 255, 0),
-			Color3.fromRGB(0, 255, 0),
-			Color3.fromRGB(0, 255, 255),
-			Color3.fromRGB(0, 0, 255),
-			Color3.fromRGB(255, 0, 255),
-			Color3.fromRGB(255, 0, 0),
+			Color3.fromHSV(0 / 7, 1, 1),
+			Color3.fromHSV(1 / 7, 1, 1),
+			Color3.fromHSV(2 / 7, 1, 1),
+			Color3.fromHSV(3 / 7, 1, 1),
+			Color3.fromHSV(4 / 7, 1, 1),
+			Color3.fromHSV(5 / 7, 1, 1),
+			Color3.fromHSV(6 / 7, 1, 1),
+			Color3.fromHSV(7 / 7, 1, 1)
 		}, nil, 90)
 
 		local svHandle = Instance.new("Frame")
 		svHandle.Parent = svPanel
 		svHandle.AnchorPoint = Vector2.new(0.5, 0.5)
-		svHandle.BackgroundColor3 = Theme.WindowBackground
-		svHandle.BorderColor3 = Theme.WindowBorderInner
+		svHandle.BackgroundColor3 = Theme.ElementBackground
+		svHandle.BorderColor3 = Theme.ElementBorderOuter
 		svHandle.BorderMode = Enum.BorderMode.Inset
 		svHandle.BorderSizePixel = 1
 		svHandle.Position = UDim2.fromScale(0, 0)
 		svHandle.Size = UDim2.fromOffset(6, 6)
 
+		AddBorderFrame(svHandle, Theme.ElementBorderInner, 1, -1)
+
 		local hueHandle = Instance.new("Frame")
 		hueHandle.Parent = huePanel
 		hueHandle.AnchorPoint = Vector2.new(0.5, 0.5)
-		hueHandle.BackgroundColor3 = Theme.WindowBackground
-		hueHandle.BorderColor3 = Theme.WindowBorderInner
+		hueHandle.BackgroundColor3 = Theme.ElementBackground
+		hueHandle.BorderColor3 = Theme.ElementBorderOuter
 		hueHandle.BorderMode = Enum.BorderMode.Inset
 		hueHandle.BorderSizePixel = 1
 		hueHandle.Position = UDim2.fromScale(0.5, 0)
-		hueHandle.Size = UDim2.new(1, 4, 0, 6)
+		hueHandle.Size = UDim2.new(1, 6, 0, 6)
+
+		AddBorderFrame(hueHandle, Theme.ElementBorderInner, 1, -1)
+
+		local hexFieldRoot = Instance.new("Frame")
+		hexFieldRoot.Parent = pickerRoot
+		hexFieldRoot.AnchorPoint = Vector2.new(0.5, 1)
+		hexFieldRoot.BackgroundTransparency = 1
+		hexFieldRoot.Position = UDim2.new(0.5, 0, 1, -4)
+		hexFieldRoot.Size = UDim2.new(1, -8, 0, 24)
+
+		local hexFieldBg = Instance.new("Frame")
+		hexFieldBg.Parent = hexFieldRoot
+		hexFieldBg.BackgroundColor3 = Theme.ButtonBackground
+		hexFieldBg.BorderColor3 = Theme.ElementBorderOuter
+		hexFieldBg.BorderMode = Enum.BorderMode.Inset
+		hexFieldBg.BorderSizePixel = 1
+		hexFieldBg.Size = UDim2.fromScale(1, 1)
+
+		AddBorderFrame(hexFieldRoot, Theme.ElementBorderInner, 1, -2)
 
 		local hexField = Instance.new("TextBox")
-		hexField.Parent = picker
-		hexField.AnchorPoint = Vector2.new(0.5, 1)
-		hexField.BackgroundColor3 = Theme.TabBackground
-		hexField.BorderColor3 = Theme.TabBorderOuter
-		hexField.BorderMode = Enum.BorderMode.Inset
-		hexField.BorderSizePixel = 1
-		hexField.Position = UDim2.new(0.5, 0, 1, -6)
-		hexField.Size = UDim2.new(1, -12, 0, 22)
+		hexField.Parent = hexFieldRoot
+		hexField.AnchorPoint = Vector2.new(0.5, 0.5)
+		hexField.BackgroundTransparency = 1
+		hexField.Position = UDim2.fromScale(0.5, 0.5)
+		hexField.Size = UDim2.new(1, -4, 1, -4)
 		hexField.Font = Enum.Font.Code
 		hexField.Text = ""
 		hexField.TextColor3 = Theme.Text
@@ -395,6 +445,8 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		hexField.TextTruncate = Enum.TextTruncate.AtEnd
 		hexField.TextXAlignment = Enum.TextXAlignment.Center
 		hexField.ClearTextOnFocus = false
+
+		AddGradientFrame(hexField, Color3.fromRGB(0, 0, 0), {0.6, 1}, -90)
 
 		local _h, _s, _v = 0, 0, 0
 		local _hueInput = nil
@@ -414,7 +466,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		local function onValueChange()
 			if window.colorPicker.colorElement then
 				local color = Color3.fromHSV(_h, _s, _v)
-				window.colorPicker.colorElement.callback(color)
+				window.colorPicker.colorElement.onValueChange(color)
 			end
 		end
 
@@ -451,7 +503,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 			onValueChange()
 		end
 
-		AddConnection(huePanel.InputBegan, function(input: InputObject)
+		AddConnection(huePanelRoot.InputBegan, function(input: InputObject)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				_hueInput = input
 				handleHueInput(input)
@@ -464,13 +516,13 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 			end
 		end)
 
-		AddConnection(huePanel.InputEnded, function(input: InputObject)
+		AddConnection(huePanelRoot.InputEnded, function(input: InputObject)
 			if _hueInput == input and input.UserInputState == Enum.UserInputState.End then
 				_hueInput = nil
 			end
 		end)
 
-		AddConnection(svPanel.InputBegan, function(input: InputObject)
+		AddConnection(svPanelRoot.InputBegan, function(input: InputObject)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				_svInput = input
 				handleSvInput(input)
@@ -483,7 +535,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 			end
 		end)
 
-		AddConnection(svPanel.InputEnded, function(input: InputObject)
+		AddConnection(svPanelRoot.InputEnded, function(input: InputObject)
 			if _svInput == input and input.UserInputState == Enum.UserInputState.End then
 				_svInput = nil
 			end
@@ -500,7 +552,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 
 		window.colorPicker = {
 			objects = {
-				root = picker,
+				root = pickerRoot,
 			},
 			colorElement = nil,
 			setColor = function(color: Color3)
@@ -790,7 +842,7 @@ end
 
 function Section:AddToggle(properties: {[string]: any}?): ()
 	local name = properties.Name
-	local callback = properties.Callback or function() end
+	local callback = properties.Callback
 
 	local button = Instance.new("ImageButton")
 	button.Parent = self.objects.elements
@@ -868,7 +920,9 @@ function Section:AddToggle(properties: {[string]: any}?): ()
 		AddConnection(button.Activated, function()
 			_value = not _value
 			updateVisual()
-			callback(_value)
+			if callback then
+				task.spawn(callback, _value)
+			end
 		end)
 
 		updateVisual(true)
@@ -925,7 +979,7 @@ function Section:AddSlider(properties: {[string]: any}?): ()
 	local max = properties.Max or 10
 	local decimal = properties.Decimal or 0
 	local defaultValue = properties.Value or min
-	local callback = properties.Callback or function() end
+	local callback = properties.Callback
 
 	assert(min < max, "最大値は最小値より大きい必要があります。")
 
@@ -1025,7 +1079,9 @@ function Section:AddSlider(properties: {[string]: any}?): ()
 			if valueChanged then
 				updateVisual()
 			end
-			callback(value)
+			if callback then
+				task.spawn(callback, _value)
+			end
 		end
 
 		AddConnection(slider.InputBegan, function(input: InputObject)
@@ -1098,7 +1154,7 @@ end
 function Section:AddColor(properties: {[string]: any}?): ()
 	local name = properties.Name
 	local defaultValue = properties.Value or Color3.fromRGB(255, 255, 255)
-	local callback = properties.Callback or function() end
+	local callback = properties.Callback
 
 	local button = Instance.new("ImageButton")
 	button.Parent = self.objects.elements
@@ -1148,17 +1204,21 @@ function Section:AddColor(properties: {[string]: any}?): ()
 	text.TextTruncate = Enum.TextTruncate.AtEnd
 
 	do
-		local _color = defaultValue
+		local _value = defaultValue
 
 		local function updateVisual()
-			panel.BackgroundColor3 = _color
+			panel.BackgroundColor3 = _value
 		end
 
 		local colorElement = {
-			callback = function(color: Color3)
-				_color = color
+			onValueChange = function(color)
+				_value = color
+
 				updateVisual()
-				callback(color)
+
+				if callback then
+					task.spawn(callback, _value)
+				end
 			end,
 		}
 
@@ -1174,7 +1234,7 @@ function Section:AddColor(properties: {[string]: any}?): ()
 				pickerRoot.Visible = false
 			else
 				colorPickerInfo.colorElement = colorElement
-				colorPickerInfo.setColor(_color)
+				colorPickerInfo.setColor(_value)
 				local rel = button.AbsolutePosition - windowRoot.AbsolutePosition + Vector2.new(button.AbsoluteSize.X / 2, button.AbsoluteSize.Y)
 
 				pickerRoot.Parent = windowRoot
@@ -1231,7 +1291,7 @@ end
 
 function Section:AddButton(properties: {[string]: any}): ()
 	local name = properties.Name
-	local callback = properties.Callback or function() end
+	local callback = properties.Callback
 
 	local frame = Instance.new("Frame")
 	frame.Parent = self.objects.elements
@@ -1272,7 +1332,9 @@ function Section:AddButton(properties: {[string]: any}): ()
 	text.TextTruncate = Enum.TextTruncate.AtEnd
 
 	AddConnection(button.Activated, function()
-		callback()
+		if callback then
+			task.spawn(callback)
+		end
 	end)
 
 	do -- ホールド時のアニメーション
@@ -1322,7 +1384,7 @@ end
 
 function Section:AddKeybind(properties: {[string]: any}): ()
 	local name = properties.Name
-	local callback = properties.Callback or function() end
+	local callback = properties.Callback
 	local defaultValue = properties.Value or nil
 
 	local frame = Instance.new("Frame")
@@ -1387,7 +1449,10 @@ function Section:AddKeybind(properties: {[string]: any}): ()
 		AddConnection(button.Activated, function()
 			_waitForInput = true
 			buttonText.Text = "..."
-			callback(nil)
+
+			if callback then
+				task.spawn(callback, nil)
+			end
 		end)
 
 		AddConnection(UserInputService.InputBegan, function(input: InputObject)
@@ -1404,7 +1469,9 @@ function Section:AddKeybind(properties: {[string]: any}): ()
 
 				updateVisual()
 
-				callback(_value)
+				if callback then
+					task.spawn(callback, _value)
+				end
 			end
 		end)
 
