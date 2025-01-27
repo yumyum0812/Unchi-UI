@@ -68,6 +68,7 @@ do
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = false
 	gui.AutoLocalize = false
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 	local success = pcall(function()
 		gui.Parent = GetHiddenGui()
@@ -167,7 +168,7 @@ end
 function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	local name = properties.Name
 	local width = properties.Width or 450
-	local height = properties.Height or 520
+	local height = properties.Height or 530
 
 	local window = setmetatable({}, Window)
 	window.tabs = {}
@@ -192,11 +193,11 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 
 	AddBorderFrame(root, Theme.WindowBorderInner, 1, -2)
 
-	local handle = Instance.new("Frame")
+	local handle = Instance.new("ImageButton")
 	handle.Parent = root
-	handle.Active = true
 	handle.BackgroundTransparency = 1
 	handle.Size = UDim2.new(1, 0, 0, 64)
+	handle.Image = ""
 
 	local title = Instance.new("TextLabel")
 	title.Parent = root
@@ -216,7 +217,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	tabs.AnchorPoint = Vector2.new(0.5, 0)
 	tabs.BackgroundTransparency = 1
 	tabs.Position = UDim2.new(0.5, 0, 0, 30)
-	tabs.Size = UDim2.new(1, -16, 0, 28)
+	tabs.Size = UDim2.new(1, -12, 0, 28)
 	tabs.ScrollBarThickness = 0
 	tabs.ScrollingDirection = Enum.ScrollingDirection.X
 	tabs.CanvasSize = UDim2.new()
@@ -246,8 +247,8 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	tabSections.Parent = root
 	tabSections.AnchorPoint = Vector2.new(0.5, 1)
 	tabSections.BackgroundTransparency = 1
-	tabSections.Position = UDim2.new(0.5, 0, 1, -8)
-	tabSections.Size = UDim2.new(1, -16, 1, -66)
+	tabSections.Position = UDim2.new(0.5, 0, 1, -6)
+	tabSections.Size = UDim2.new(1, -12, 1, -64)
 
 	local tabSectionsBg = Instance.new("Frame")
 	tabSectionsBg.Parent = tabSections
@@ -289,6 +290,16 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 				_input = input
 				_startPos = root.Position
 				_startInput = input.Position
+				
+				local index = table.find(windows, window)
+				if index then
+					table.remove(windows, index)
+					table.insert(windows, window)
+					
+					for i, w in windows do
+						w.objects.root.ZIndex = i
+					end
+				end
 			end
 		end)
 
