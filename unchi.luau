@@ -4,7 +4,6 @@ local UILibrary = {}
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
 
 -- テーマ
 local Theme = {
@@ -68,13 +67,14 @@ do
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = false
 	gui.AutoLocalize = false
-	
-	if RunService:IsStudio() then
-		gui.Parent = Players.LocalPlayer.PlayerGui
-	else
+
+	local success = pcall(function()
 		gui.Parent = GetHiddenGui()
-		TryProtectGui(gui)
+	end)
+	if not success then
+		gui.Parent = Players.LocalPlayer.PlayerGui
 	end
+	TryProtectGui(gui)
 end
 
 local function AddConnection(signal: RBXScriptSignal, callback: any): ()
@@ -93,7 +93,7 @@ local function AddGradientFrame(object: GuiBase, colors: Color3 | {Color3}, tran
 	transparencies = transparencies or 0
 	rotation = rotation or 0
 	sizeOffset = sizeOffset or 0
-	
+
 	local frame = Instance.new("Frame")
 	frame.Parent = object
 	frame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -101,11 +101,11 @@ local function AddGradientFrame(object: GuiBase, colors: Color3 | {Color3}, tran
 	frame.BorderSizePixel = 0
 	frame.Position = UDim2.fromScale(0.5, 0.5)
 	frame.Size = UDim2.new(1, sizeOffset * 2, 1, sizeOffset * 2)
-	
+
 	local uiGradient = Instance.new("UIGradient")
 	uiGradient.Parent = frame
 	uiGradient.Rotation = rotation
-	
+
 	if typeof(colors) == "Color3" then
 		uiGradient.Color = ColorSequence.new(colors)
 	else
@@ -116,7 +116,7 @@ local function AddGradientFrame(object: GuiBase, colors: Color3 | {Color3}, tran
 		end
 		uiGradient.Color = ColorSequence.new(keypoints)
 	end
-	
+
 	if typeof(transparencies) == "number" then
 		uiGradient.Transparency = NumberSequence.new(transparencies)
 	else
@@ -127,13 +127,13 @@ local function AddGradientFrame(object: GuiBase, colors: Color3 | {Color3}, tran
 		end
 		uiGradient.Transparency = NumberSequence.new(keypoints)
 	end
-	
+
 	return uiGradient
 end
 
 local function AddBorderFrame(object: GuiBase, color: Color3, thickness: number, sizeOffset: number?): ()
 	sizeOffset = sizeOffset or 0
-	
+
 	local frame = Instance.new("Frame")
 	frame.Parent = object
 	frame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -141,7 +141,7 @@ local function AddBorderFrame(object: GuiBase, color: Color3, thickness: number,
 	frame.BorderSizePixel = 0
 	frame.Size = UDim2.new(1, sizeOffset * 2, 1, sizeOffset * 2)
 	frame.Position = UDim2.fromScale(0.5, 0.5)
-	
+
 	local uiStroke = Instance.new("UIStroke")
 	uiStroke.Parent = frame
 	uiStroke.Enabled = true
@@ -150,16 +150,16 @@ local function AddBorderFrame(object: GuiBase, color: Color3, thickness: number,
 	uiStroke.Thickness = thickness
 	uiStroke.LineJoinMode = Enum.LineJoinMode.Miter
 	uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	
+
 	return uiStroke
 end
 
 function UILibrary:Destroy(): ()
 	ClearConnections()
-	
+
 	gui:Destroy()
 	gui = nil
-	
+
 	windows = {}
 end
 
@@ -167,19 +167,19 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	local name = properties.Name
 	local width = properties.Width or 450
 	local height = properties.Height or 520
-	
+
 	local window = setmetatable({}, Window)
 	window.tabs = {}
 	window.objects = {}
 	table.insert(windows, window)
-	
+
 	local root = Instance.new("Frame")
 	root.Parent = gui
 	root.BackgroundTransparency = 1
 	root.AnchorPoint = Vector2.new(0.5, 0.5)
 	root.Position = UDim2.fromScale(0.5, 0.5)
 	root.Size = UDim2.fromOffset(width, height)
-	
+
 	local background = Instance.new("Frame")
 	background.Parent = root
 	background.BackgroundColor3 = Theme.WindowBackground
@@ -188,9 +188,9 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	background.BorderMode = Enum.BorderMode.Inset
 	background.BorderSizePixel = 1
 	background.Size = UDim2.fromScale(1, 1)
-	
+
 	AddBorderFrame(root, Theme.WindowBorderInner, 1, -2)
-	
+
 	local handle = Instance.new("Frame")
 	handle.Parent = root
 	handle.Active = true
@@ -209,7 +209,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	title.TextSize = 14
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.TextTruncate = Enum.TextTruncate.AtEnd
-	
+
 	local tabs = Instance.new("ScrollingFrame")
 	tabs.Parent = root
 	tabs.AnchorPoint = Vector2.new(0.5, 0)
@@ -220,13 +220,13 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	tabs.ScrollingDirection = Enum.ScrollingDirection.X
 	tabs.CanvasSize = UDim2.new()
 	tabs.AutomaticCanvasSize = Enum.AutomaticSize.X
-	
+
 	local tabsHolder = Instance.new("Frame")
 	tabsHolder.Parent = tabs
 	tabsHolder.AutomaticSize = Enum.AutomaticSize.X
 	tabsHolder.BackgroundTransparency = 1
 	tabsHolder.Size = UDim2.fromScale(0, 1)
-	
+
 	local tabLine = Instance.new("Frame")
 	tabLine.Parent = tabs
 	tabLine.AnchorPoint = Vector2.new(0.5, 1)
@@ -247,7 +247,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	tabSections.BackgroundTransparency = 1
 	tabSections.Position = UDim2.new(0.5, 0, 1, -8)
 	tabSections.Size = UDim2.new(1, -16, 1, -66)
-	
+
 	local tabSectionsBg = Instance.new("Frame")
 	tabSectionsBg.Parent = tabSections
 	tabSectionsBg.BackgroundColor3 = Theme.TabBackground
@@ -255,7 +255,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	tabSectionsBg.BorderColor3 = Theme.TabBorderOuter
 	tabSectionsBg.BorderMode = Enum.BorderMode.Inset
 	tabSectionsBg.BorderSizePixel = 1
-	
+
 	do
 		local outline = Instance.new("Frame")
 		outline.Parent = tabSections
@@ -272,12 +272,12 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		stroke.LineJoinMode = Enum.LineJoinMode.Miter
 		stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	end
-	
+
 	window.objects.root = root
 	window.objects.tabs = tabsHolder
 	window.objects.tabSections = tabSections
 	window.objects.tabLine = tabLine
-	
+
 	do -- ドラッグ対応
 		local _input = nil
 		local _startPos = nil
@@ -306,7 +306,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 			end
 		end)
 	end
-	
+
 	do -- カラーピッカー
 		local picker = Instance.new("Frame")
 		picker.Parent = root
@@ -315,7 +315,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		picker.Position = UDim2.fromOffset(-4, 0)
 		picker.Size = UDim2.fromOffset(220, 220)
 		picker.Visible = false
-		
+
 		local background = Instance.new("Frame")
 		background.Parent = picker
 		background.BackgroundColor3 = Theme.WindowBackground
@@ -323,9 +323,9 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		background.BorderMode = Enum.BorderMode.Inset
 		background.BorderSizePixel = 1
 		background.Size = UDim2.fromScale(1, 1)
-		
+
 		AddBorderFrame(picker, Theme.WindowBorderInner, 1, -2)
-		
+
 		local svPanel = Instance.new("ImageButton")
 		svPanel.Parent = picker
 		svPanel.AutoButtonColor = false
@@ -335,10 +335,10 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		svPanel.Position = UDim2.fromOffset(6, 6)
 		svPanel.Size = UDim2.fromOffset(180, 180)
 		svPanel.Image = ""
-		
+
 		AddGradientFrame(svPanel, Color3.fromRGB(255, 255, 255), {0, 1}, 0)
 		AddGradientFrame(svPanel, Color3.fromRGB(0, 0, 0), {0, 1}, -90)
-		
+
 		local huePanel = Instance.new("ImageButton")
 		huePanel.Parent = picker
 		huePanel.AutoButtonColor = false
@@ -348,7 +348,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		huePanel.Position = UDim2.fromOffset(192, 6)
 		huePanel.Size = UDim2.fromOffset(22, 180)
 		huePanel.Image = ""
-		
+
 		AddGradientFrame(huePanel, {
 			Color3.fromRGB(255, 0, 0),
 			Color3.fromRGB(255, 255, 0),
@@ -358,7 +358,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 			Color3.fromRGB(255, 0, 255),
 			Color3.fromRGB(255, 0, 0),
 		}, nil, 90)
-		
+
 		local svHandle = Instance.new("Frame")
 		svHandle.Parent = svPanel
 		svHandle.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -368,7 +368,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		svHandle.BorderSizePixel = 1
 		svHandle.Position = UDim2.fromScale(0, 0)
 		svHandle.Size = UDim2.fromOffset(6, 6)
-		
+
 		local hueHandle = Instance.new("Frame")
 		hueHandle.Parent = huePanel
 		hueHandle.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -378,7 +378,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		hueHandle.BorderSizePixel = 1
 		hueHandle.Position = UDim2.fromScale(0.5, 0)
 		hueHandle.Size = UDim2.new(1, 4, 0, 6)
-		
+
 		local hexField = Instance.new("TextBox")
 		hexField.Parent = picker
 		hexField.AnchorPoint = Vector2.new(0.5, 1)
@@ -395,81 +395,81 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		hexField.TextTruncate = Enum.TextTruncate.AtEnd
 		hexField.TextXAlignment = Enum.TextXAlignment.Center
 		hexField.ClearTextOnFocus = false
-		
+
 		local _h, _s, _v = 0, 0, 0
 		local _hueInput = nil
 		local _svInput = nil
-		
+
 		local function updateVisual()
 			hueHandle.Position = UDim2.fromScale(0.5, _h)
 			svHandle.Position = UDim2.fromScale(_s, 1 - _v)
 			svPanel.BackgroundColor3 = Color3.fromHSV(_h, 1, 1)
 		end
-		
+
 		local function updateHexField()
 			local color = Color3.fromHSV(_h, _s, _v)
 			hexField.Text = color:ToHex()
 		end
-		
+
 		local function onValueChange()
 			if window.colorPicker.colorElement then
 				local color = Color3.fromHSV(_h, _s, _v)
 				window.colorPicker.colorElement.callback(color)
 			end
 		end
-		
+
 		local function handleHueInput(input: InputObject)
 			local relative = input.Position.Y - huePanel.AbsolutePosition.Y
 			local ratio = math.clamp(relative / huePanel.AbsoluteSize.Y, 0, 1)
 
 			_h = ratio
-			
+
 			updateVisual()
 			updateHexField()
 			onValueChange()
 		end
-		
+
 		local function handleSvInput(input: InputObject)
 			local relative = Vector2.new(input.Position.X, input.Position.Y) - svPanel.AbsolutePosition
 			local ratio = Vector2.new(
 				math.clamp(relative.X / svPanel.AbsoluteSize.X, 0, 1),
 				math.clamp(relative.Y / svPanel.AbsoluteSize.Y, 0, 1)
 			)
-			
+
 			_s = ratio.X
 			_v = 1 - ratio.Y
-			
+
 			updateVisual()
 			updateHexField()
 			onValueChange()
 		end
-		
+
 		local function setColor(color: Color3)
 			_h, _s, _v = color:ToHSV()
 			updateVisual()
 			updateHexField()
 			onValueChange()
 		end
-		
+
 		AddConnection(huePanel.InputBegan, function(input: InputObject)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				_hueInput = input
 				handleHueInput(input)
 			end
 		end)
-		
+
 		AddConnection(UserInputService.InputChanged, function(input: InputObject)
 			if _hueInput and input.UserInputType == Enum.UserInputType.MouseMovement then
 				handleHueInput(input)
 			end
 		end)
-		
+
 		AddConnection(huePanel.InputEnded, function(input: InputObject)
 			if _hueInput == input and input.UserInputState == Enum.UserInputState.End then
 				_hueInput = nil
 			end
 		end)
-		
+
 		AddConnection(svPanel.InputBegan, function(input: InputObject)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				_svInput = input
@@ -488,7 +488,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 				_svInput = nil
 			end
 		end)
-		
+
 		AddConnection(hexField.FocusLost, function()
 			local success, color = pcall(function()
 				return Color3.fromHex(hexField.Text)
@@ -497,7 +497,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 				setColor(color)
 			end
 		end)
-		
+
 		window.colorPicker = {
 			objects = {
 				root = picker,
@@ -524,7 +524,7 @@ end
 
 function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 	local name = properties.Name
-	
+
 	local tab = setmetatable({}, Tab)
 	tab.window = self
 	tab.objects = {}
@@ -546,7 +546,7 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 	uiPadding.Parent = button
 	uiPadding.PaddingLeft = UDim.new(0, 16)
 	uiPadding.PaddingRight = UDim.new(0, 16)
-	
+
 	local sections = Instance.new("Frame")
 	sections.Parent = self.objects.tabSections
 	sections.BorderSizePixel = 0
@@ -601,17 +601,17 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 		uiPadding.PaddingLeft = UDim.new(0, 5)
 		uiPadding.PaddingRight = UDim.new(0, 10)
 	end
-	
+
 	tab.objects.sectionsL = sectionsL
 	tab.objects.sectionsR = sectionsR
 	tab.selected = (#self.tabs == 1)
 
 	local _tween = nil
-	
+
 	function tab.updateVisual(instant: boolean?)
 		button.TextColor3 = tab.selected and Theme.Accent or Theme.TabText
 		sections.Visible = tab.selected
-		
+
 		if tab.selected then
 			if instant then
 				self.objects.tabLine.Position = UDim2.new(0, button.AbsolutePosition.X - self.objects.tabs.AbsolutePosition.X + button.AbsoluteSize.X / 2, 1, 0)
@@ -620,7 +620,7 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 				if _tween then
 					_tween:Cancel()
 				end
-				
+
 				local info = TweenInfo.new(0.2, Enum.EasingStyle.Sine)
 				_tween = TweenService:Create(self.objects.tabLine, info, {
 					Position = UDim2.new(0, button.AbsolutePosition.X - self.objects.tabs.AbsolutePosition.X + button.AbsoluteSize.X / 2, 1, 0),
@@ -630,7 +630,7 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 			end
 		end
 	end
-	
+
 	AddConnection(button:GetPropertyChangedSignal("AbsoluteSize"), function()
 		tab.updateVisual(true)
 	end)
@@ -639,18 +639,18 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 		if tab.selected then
 			return
 		end
-		
+
 		for _, t in self.tabs do
 			tab.window.colorPicker.colorElement = nil
 			tab.window.colorPicker.objects.root.Visible = false
-			
+
 			t.selected = (t == tab)
 			t.updateVisual()
 		end
 	end)
 
 	tab.updateVisual(true)
-	
+
 	do -- ホールド時のアニメーション
 		local _tween = nil
 		local _hover = false
@@ -660,7 +660,7 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 			if _tween then
 				_tween:Cancel()
 			end
-			
+
 			if not tab.selected then
 				local info = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
 				_tween = TweenService:Create(button, info, {
@@ -703,7 +703,7 @@ end
 function Tab:CreateSection(properties: {[string]: any}): typeof(Section)
 	local name = properties.Name
 	local rightSide = properties.RightSide
-	
+
 	local section = setmetatable({}, Section)
 	section.tab = self
 	section.objects = {}
@@ -714,7 +714,7 @@ function Tab:CreateSection(properties: {[string]: any}): typeof(Section)
 	root.BackgroundTransparency = 1
 	root.AutomaticSize = Enum.AutomaticSize.Y
 	root.Size = UDim2.fromScale(1, 0)
-	
+
 	local background = Instance.new("Frame")
 	background.Parent = root
 	background.BackgroundColor3 = Theme.SectionBackground
@@ -722,7 +722,7 @@ function Tab:CreateSection(properties: {[string]: any}): typeof(Section)
 	background.BorderMode = Enum.BorderMode.Inset
 	background.BorderSizePixel = 1
 	background.Size = UDim2.fromScale(1, 1)
-	
+
 	AddBorderFrame(root, Theme.SectionBorderInner, 1, -2)
 
 	local line = Instance.new("Frame")
@@ -791,7 +791,7 @@ end
 function Section:AddToggle(properties: {[string]: any}?): ()
 	local name = properties.Name
 	local callback = properties.Callback or function() end
-	
+
 	local button = Instance.new("ImageButton")
 	button.Parent = self.objects.elements
 	button.AutoButtonColor = false
@@ -818,7 +818,7 @@ function Section:AddToggle(properties: {[string]: any}?): ()
 	switch.BackgroundTransparency = 1
 	switch.Position = UDim2.new(0, 8, 0.5, 0)
 	switch.Size = UDim2.fromOffset(14, 14)
-	
+
 	local switchBg = Instance.new("Frame")
 	switchBg.Parent = switch
 	switchBg.BackgroundColor3 = Theme.ElementBackground
@@ -826,7 +826,7 @@ function Section:AddToggle(properties: {[string]: any}?): ()
 	switchBg.BorderMode = Enum.BorderMode.Inset
 	switchBg.BorderSizePixel = 1
 	switchBg.Size = UDim2.fromScale(1, 1)
-	
+
 	local innerBorder = AddBorderFrame(switch, Theme.ElementBorderInner, 1, -2)
 
 	local coreHolder = Instance.new("Frame")
@@ -843,7 +843,7 @@ function Section:AddToggle(properties: {[string]: any}?): ()
 	core.BorderSizePixel = 0
 	core.Position = UDim2.fromScale(0.5, 0.5)
 	core.Size = UDim2.fromScale(1, 1)
-	
+
 	AddGradientFrame(core, Color3.fromRGB(0, 0, 0), {0.6, 1}, -90)
 
 	do
@@ -873,7 +873,7 @@ function Section:AddToggle(properties: {[string]: any}?): ()
 
 		updateVisual(true)
 	end
-	
+
 	do -- ホールド時のアニメーション
 		local _tween = nil
 		local _hover = false
@@ -958,7 +958,7 @@ function Section:AddSlider(properties: {[string]: any}?): ()
 	slider.Position = UDim2.new(0.5, 0, 1, -4)
 	slider.Size = UDim2.new(1, -16, 0, 20)
 	slider.Image = ""
-	
+
 	local sliderBg = Instance.new("Frame")
 	sliderBg.Parent = slider
 	sliderBg.BackgroundColor3 = Theme.ElementBackground
@@ -968,9 +968,9 @@ function Section:AddSlider(properties: {[string]: any}?): ()
 	sliderBg.AnchorPoint = Vector2.new(0.5, 0.5)
 	sliderBg.Position = UDim2.fromScale(0.5, 0.5)
 	sliderBg.Size = UDim2.fromScale(1, 1)
-	
+
 	local innerBorder = AddBorderFrame(slider, Theme.ElementBorderInner, 1, -2)
-	
+
 	local progressHolder = Instance.new("Frame")
 	progressHolder.Parent = slider
 	progressHolder.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -997,9 +997,9 @@ function Section:AddSlider(properties: {[string]: any}?): ()
 
 		local function updateVisual(instant: boolean?)
 			local ratio = math.clamp((_value - min) / range, 0, 1)
-			
+
 			text.Text = name:format(_value)
-			
+
 			if instant then
 				progress.Size = UDim2.new(ratio, 0, 1, 0)
 			else
@@ -1021,13 +1021,13 @@ function Section:AddSlider(properties: {[string]: any}?): ()
 
 			local valueChanged = value ~= _value
 			_value = value
-			
+
 			if valueChanged then
 				updateVisual()
 			end
 			callback(value)
 		end
-		
+
 		AddConnection(slider.InputBegan, function(input: InputObject)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				_input = input
@@ -1049,7 +1049,7 @@ function Section:AddSlider(properties: {[string]: any}?): ()
 
 		updateVisual(true)
 	end
-	
+
 	do -- ホールド時のアニメーション
 		local _tween = nil
 		local _hover = false
@@ -1099,7 +1099,7 @@ function Section:AddColor(properties: {[string]: any}?): ()
 	local name = properties.Name
 	local defaultValue = properties.Value or Color3.fromRGB(255, 255, 255)
 	local callback = properties.Callback or function() end
-	
+
 	local button = Instance.new("ImageButton")
 	button.Parent = self.objects.elements
 	button.AutoButtonColor = false
@@ -1113,7 +1113,7 @@ function Section:AddColor(properties: {[string]: any}?): ()
 	panelRoot.BackgroundTransparency = 1
 	panelRoot.Position = UDim2.new(1, -8, 0.5, 0)
 	panelRoot.Size = UDim2.fromOffset(24, 16)
-	
+
 	local panelBg = Instance.new("Frame")
 	panelBg.Parent = panelRoot
 	panelBg.BackgroundColor3 = Theme.ElementBackground
@@ -1121,9 +1121,9 @@ function Section:AddColor(properties: {[string]: any}?): ()
 	panelBg.BorderMode = Enum.BorderMode.Inset
 	panelBg.BorderSizePixel = 1
 	panelBg.Size = UDim2.fromScale(1, 1)
-	
+
 	local innerBorder = AddBorderFrame(panelRoot, Theme.ElementBorderInner, 1, -2)
-	
+
 	local panel = Instance.new("Frame")
 	panel.Parent = panelRoot
 	panel.BackgroundColor3 = defaultValue
@@ -1146,7 +1146,7 @@ function Section:AddColor(properties: {[string]: any}?): ()
 	text.TextSize = 14
 	text.TextXAlignment = Enum.TextXAlignment.Left
 	text.TextTruncate = Enum.TextTruncate.AtEnd
-	
+
 	do
 		local _color = defaultValue
 
@@ -1165,10 +1165,10 @@ function Section:AddColor(properties: {[string]: any}?): ()
 		AddConnection(button.Activated, function()
 			local windowInfo = self.tab.window
 			local colorPickerInfo = self.tab.window.colorPicker
-			
+
 			local windowRoot = windowInfo.objects.root
 			local pickerRoot = colorPickerInfo.objects.root
-			
+
 			if colorPickerInfo.colorElement == colorElement then
 				colorPickerInfo.colorElement = nil
 				pickerRoot.Visible = false
@@ -1183,7 +1183,7 @@ function Section:AddColor(properties: {[string]: any}?): ()
 			end
 		end)
 	end
-	
+
 	do -- ホールド時のアニメーション
 		local _tween = nil
 		local _hover = false
@@ -1232,12 +1232,12 @@ end
 function Section:AddButton(properties: {[string]: any}): ()
 	local name = properties.Name
 	local callback = properties.Callback or function() end
-	
+
 	local frame = Instance.new("Frame")
 	frame.Parent = self.objects.elements
 	frame.BackgroundTransparency = 1
 	frame.Size = UDim2.new(1, 0, 0, 34)
-	
+
 	local button = Instance.new("ImageButton")
 	button.Parent = frame
 	button.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1246,7 +1246,7 @@ function Section:AddButton(properties: {[string]: any}): ()
 	button.Position = UDim2.fromScale(0.5, 0.5)
 	button.Size = UDim2.new(1, -16, 0, 26)
 	button.Image = ""
-	
+
 	local buttonBg = Instance.new("Frame")
 	buttonBg.Parent = button
 	buttonBg.BackgroundColor3 = Theme.ButtonBackground
@@ -1254,11 +1254,11 @@ function Section:AddButton(properties: {[string]: any}): ()
 	buttonBg.BorderMode = Enum.BorderMode.Inset
 	buttonBg.BorderSizePixel = 1
 	buttonBg.Size = UDim2.fromScale(1, 1)
-	
+
 	local innerBorder = AddBorderFrame(button, Theme.ElementBorderInner, 1, -2)
-	
+
 	AddGradientFrame(button, Color3.fromRGB(0, 0, 0), {0.6, 1}, -90, -2)
-	
+
 	local text = Instance.new("TextLabel")
 	text.Parent = button
 	text.BackgroundTransparency = 1
@@ -1270,16 +1270,16 @@ function Section:AddButton(properties: {[string]: any}): ()
 	text.TextSize = 14
 	text.TextXAlignment = Enum.TextXAlignment.Center
 	text.TextTruncate = Enum.TextTruncate.AtEnd
-	
+
 	AddConnection(button.Activated, function()
 		callback()
 	end)
-	
+
 	do -- ホールド時のアニメーション
 		local _tween = nil
 		local _hover = false
 		local _hold = false
-		
+
 		local function updateAnim(hold: boolean)
 			if _tween then
 				_tween:Cancel()
@@ -1329,7 +1329,7 @@ function Section:AddKeybind(properties: {[string]: any}): ()
 	frame.Parent = self.objects.elements
 	frame.BackgroundTransparency = 1
 	frame.Size = UDim2.new(1, 0, 0, 54)
-	
+
 	local text = Instance.new("TextLabel")
 	text.Parent = frame
 	text.AnchorPoint = Vector2.new(1, 0)
@@ -1379,21 +1379,21 @@ function Section:AddKeybind(properties: {[string]: any}): ()
 	do -- 実装
 		local _value = defaultValue
 		local _waitForInput = false
-		
+
 		local function updateVisual()
 			buttonText.Text = _value and _value.Name or "---"
 		end
-		
+
 		AddConnection(button.Activated, function()
 			_waitForInput = true
 			buttonText.Text = "..."
 			callback(nil)
 		end)
-		
+
 		AddConnection(UserInputService.InputBegan, function(input: InputObject)
 			if _waitForInput then
 				_waitForInput = false
-				
+
 				if input.UserInputType == Enum.UserInputType.Keyboard then
 					if input.KeyCode == Enum.KeyCode.Backspace then
 						_value = nil
@@ -1401,13 +1401,13 @@ function Section:AddKeybind(properties: {[string]: any}): ()
 						_value = input.KeyCode
 					end
 				end
-				
+
 				updateVisual()
-				
+
 				callback(_value)
 			end
 		end)
-		
+
 		updateVisual()
 	end
 
