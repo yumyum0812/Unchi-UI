@@ -203,7 +203,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	title.Parent = root
 	title.AnchorPoint = Vector2.new(0.5, 0)
 	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0.5, 0, 0, 10)
+	title.Position = UDim2.new(0.5, 0, 0, 12)
 	title.Size = UDim2.new(1, -24, 0, 14)
 	title.Font = Enum.Font.Code
 	title.Text = name
@@ -216,7 +216,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	tabs.Parent = root
 	tabs.AnchorPoint = Vector2.new(0.5, 0)
 	tabs.BackgroundTransparency = 1
-	tabs.Position = UDim2.new(0.5, 0, 0, 30)
+	tabs.Position = UDim2.new(0.5, 0, 0, 32)
 	tabs.Size = UDim2.new(1, -12, 0, 28)
 	tabs.ScrollBarThickness = 0
 	tabs.ScrollingDirection = Enum.ScrollingDirection.X
@@ -248,7 +248,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	tabSections.AnchorPoint = Vector2.new(0.5, 1)
 	tabSections.BackgroundTransparency = 1
 	tabSections.Position = UDim2.new(0.5, 0, 1, -6)
-	tabSections.Size = UDim2.new(1, -12, 1, -64)
+	tabSections.Size = UDim2.new(1, -12, 1, -66)
 
 	local tabSectionsBg = Instance.new("Frame")
 	tabSectionsBg.Parent = tabSections
