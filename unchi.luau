@@ -1396,7 +1396,7 @@ end
 function Section:AddKeybind(properties: {[string]: any}): ()
 	local name = properties.Name
 	local callback = properties.Callback
-	local defaultValue = properties.Value or nil
+	local defaultValue = properties.Value
 
 	local frame = Instance.new("Frame")
 	frame.Parent = self.objects.elements
