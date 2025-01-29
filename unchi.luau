@@ -871,7 +871,7 @@ function Tab:CreateSection(properties: {[string]: any}): typeof(Section)
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = elements
 	uiPadding.PaddingTop = UDim.new(0, 8)
-	uiPadding.PaddingBottom = UDim.new(0, 4)
+	uiPadding.PaddingBottom = UDim.new(0, 6)
 
 	local uiList = Instance.new("UIListLayout")
 	uiList.Parent = elements
