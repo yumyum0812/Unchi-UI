@@ -626,8 +626,8 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = button
-	uiPadding.PaddingLeft = UDim.new(0, 20)
-	uiPadding.PaddingRight = UDim.new(0, 20)
+	uiPadding.PaddingLeft = UDim.new(0, 16)
+	uiPadding.PaddingRight = UDim.new(0, 16)
 
 	local sections = Instance.new("Frame")
 	sections.Parent = self.objects.tabSections
