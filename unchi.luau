@@ -8,7 +8,7 @@ local TweenService = game:GetService("TweenService")
 -- テーマ
 local Theme = {
 	Accent = Color3.fromRGB(168, 62, 244),
-	Text = Color3.fromRGB(200, 200, 200),
+	Text = Color3.fromRGB(214, 214, 214),
 	WindowBackground = Color3.fromRGB(38, 38, 38),
 	WindowBorderInner = Color3.fromRGB(75, 75, 75),
 	WindowBorderOuter = Color3.fromRGB(30, 30, 30),
