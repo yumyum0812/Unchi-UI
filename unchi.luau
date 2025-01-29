@@ -212,14 +212,15 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	title.TextColor3 = Theme.Accent
 	title.TextSize = 14
 	title.TextXAlignment = Enum.TextXAlignment.Left
-	title.TextTruncate = Enum.TextTruncate.AtEnd
+	title.TextTruncate = Enum.TextTruncate.SplitWord
+	title.RichText = true
 
 	local tabs = Instance.new("ScrollingFrame")
 	tabs.Parent = root
 	tabs.AnchorPoint = Vector2.new(0.5, 0)
 	tabs.BackgroundTransparency = 1
-	tabs.Position = UDim2.new(0.5, 0, 0, 32)
-	tabs.Size = UDim2.new(1, -12, 0, 28)
+	tabs.Position = UDim2.new(0.5, 0, 0, 31)
+	tabs.Size = UDim2.new(1, -12, 0, 30)
 	tabs.ScrollBarThickness = 0
 	tabs.ScrollingDirection = Enum.ScrollingDirection.X
 	tabs.CanvasSize = UDim2.new()
@@ -229,7 +230,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	tabsHolder.Parent = tabs
 	tabsHolder.AutomaticSize = Enum.AutomaticSize.X
 	tabsHolder.BackgroundTransparency = 1
-	tabsHolder.Size = UDim2.fromScale(0, 1)
+	tabsHolder.Size = UDim2.new(0, 0, 1, -1)
 
 	local tabLine = Instance.new("Frame")
 	tabLine.Parent = tabs
@@ -459,7 +460,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 		hexField.Text = ""
 		hexField.TextColor3 = Theme.Text
 		hexField.TextSize = 14
-		hexField.TextTruncate = Enum.TextTruncate.AtEnd
+		hexField.TextTruncate = Enum.TextTruncate.SplitWord
 		hexField.TextXAlignment = Enum.TextXAlignment.Center
 		hexField.ClearTextOnFocus = false
 
@@ -623,6 +624,7 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 	button.Text = name
 	button.TextColor3 = Theme.Accent
 	button.TextSize = 14
+	button.RichText = true
 
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = button
@@ -696,7 +698,7 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 
 		if tab.selected then
 			if instant then
-				self.objects.tabLine.Position = UDim2.new(0, button.AbsolutePosition.X - self.objects.tabs.AbsolutePosition.X + button.AbsoluteSize.X / 2, 1, 0)
+				self.objects.tabLine.Position = UDim2.new(0, button.AbsolutePosition.X - self.objects.tabs.AbsolutePosition.X + button.AbsoluteSize.X / 2, 1, -1)
 				self.objects.tabLine.Size = UDim2.fromOffset(button.AbsoluteSize.X, 1)
 			else
 				if _tween then
@@ -706,7 +708,7 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 
 				local info = TweenInfo.new(0.2, Enum.EasingStyle.Sine)
 				_tween = TweenService:Create(self.objects.tabLine, info, {
-					Position = UDim2.new(0, button.AbsolutePosition.X - self.objects.tabs.AbsolutePosition.X + button.AbsoluteSize.X / 2, 1, 0),
+					Position = UDim2.new(0, button.AbsolutePosition.X - self.objects.tabs.AbsolutePosition.X + button.AbsoluteSize.X / 2, 1, -1),
 					Size = UDim2.fromOffset(button.AbsoluteSize.X, 1)
 				})
 				_tween:Play()
@@ -846,13 +848,13 @@ function Tab:CreateSection(properties: {[string]: any}): typeof(Section)
 	text.Parent = textSpace
 	text.AutomaticSize = Enum.AutomaticSize.X
 	text.BackgroundTransparency = 1
-	text.BorderSizePixel = 0
+	text.Position = UDim2.fromOffset(0, -8)
+	text.Size = UDim2.fromOffset(0, 14)
 	text.Font = Enum.Font.Code
 	text.Text = name
 	text.TextColor3 = Theme.Accent
 	text.TextSize = 14
-	text.Position = UDim2.fromOffset(0, -8)
-	text.Size = UDim2.fromOffset(0, 14)
+	text.RichText = true
 
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = text
@@ -888,29 +890,39 @@ function Section:AddToggle(properties: {[string]: any}?): ()
 
 	local button = Instance.new("ImageButton")
 	button.Parent = self.objects.elements
+	button.AutomaticSize = Enum.AutomaticSize.Y
 	button.AutoButtonColor = false
 	button.BackgroundTransparency = 1
-	button.Size = UDim2.new(1, 0, 0, 22)
+	button.Size = UDim2.new(1, 0, 0, 0)
 	button.Image = ""
+	
+	local uiPadding = Instance.new("UIPadding")
+	uiPadding.Parent = button
+	uiPadding.PaddingLeft = UDim.new(0, 10)
+	uiPadding.PaddingRight = UDim.new(0, 10)
+	uiPadding.PaddingTop = UDim.new(0, 4)
+	uiPadding.PaddingBottom = UDim.new(0, 4)
 
 	local text = Instance.new("TextLabel")
 	text.Parent = button
-	text.AnchorPoint = Vector2.new(1, 0.5)
+	text.AnchorPoint = Vector2.new(1, 0)
+	text.AutomaticSize = Enum.AutomaticSize.Y
 	text.BackgroundTransparency = 1
-	text.Position = UDim2.new(1, 0, 0.5, 0)
-	text.Size = UDim2.new(1, -32, 0, 14)
+	text.Position = UDim2.new(1, 0, 0, 0)
+	text.Size = UDim2.new(1, -24, 0, 0)
 	text.Font = Enum.Font.Code
 	text.Text = name
 	text.TextColor3 = Theme.Text
 	text.TextSize = 14
-	text.TextTruncate = Enum.TextTruncate.AtEnd
+	text.TextTruncate = Enum.TextTruncate.SplitWord
 	text.TextXAlignment = Enum.TextXAlignment.Left
+	text.RichText = true
 
 	local switch = Instance.new("Frame")
 	switch.Parent = button
 	switch.AnchorPoint = Vector2.new(0, 0.5)
 	switch.BackgroundTransparency = 1
-	switch.Position = UDim2.new(0, 8, 0.5, 0)
+	switch.Position = UDim2.new(0, 0, 0.5, 0)
 	switch.Size = UDim2.fromOffset(14, 14)
 
 	local switchBg = Instance.new("Frame")
@@ -1034,32 +1046,45 @@ function Section:AddSlider(properties: {[string]: any}?): ()
 
 	local frame = Instance.new("Frame")
 	frame.Parent = self.objects.elements
+	frame.AutomaticSize = Enum.AutomaticSize.Y
 	frame.BackgroundTransparency = 1
-	frame.Size = UDim2.new(1, 0, 0, 48)
+	frame.Size = UDim2.new(1, 0, 0, 0)
+	
+	local uiList = Instance.new("UIListLayout")
+	uiList.Parent = frame
+	uiList.FillDirection = Enum.FillDirection.Vertical
+	uiList.SortOrder = Enum.SortOrder.LayoutOrder
+	uiList.Padding = UDim.new(0, 4)
+	
+	local uiPadding = Instance.new("UIPadding")
+	uiPadding.Parent = frame
+	uiPadding.PaddingLeft = UDim.new(0, 10)
+	uiPadding.PaddingRight = UDim.new(0, 10)
+	uiPadding.PaddingTop = UDim.new(0, 4)
+	uiPadding.PaddingBottom = UDim.new(0, 4)
 
 	local text = Instance.new("TextLabel")
 	text.Parent = frame
-	text.AnchorPoint = Vector2.new(1, 0)
+	text.AutomaticSize = Enum.AutomaticSize.Y
 	text.BackgroundTransparency = 1
-	text.Position = UDim2.new(1, 0, 0, 4)
-	text.Size = UDim2.new(1, -10, 0, 14)
+	text.Position = UDim2.new()
+	text.Size = UDim2.fromScale(1, 0)
 	text.Font = Enum.Font.Code
 	text.Text = name
 	text.TextColor3 = Theme.Text
 	text.TextSize = 14
-	text.TextTruncate = Enum.TextTruncate.AtEnd
+	text.TextTruncate = Enum.TextTruncate.SplitWord
 	text.TextXAlignment = Enum.TextXAlignment.Left
+	text.RichText = true
 
 	local slider = Instance.new("ImageButton")
 	slider.Parent = frame
-	slider.Active = true
-	slider.Selectable = true
 	slider.AutoButtonColor = false
 	slider.AnchorPoint = Vector2.new(0.5, 1)
 	slider.BackgroundColor3 = Theme.ElementBorderOuter
 	slider.BorderSizePixel = 0
-	slider.Position = UDim2.new(0.5, 0, 1, -4)
-	slider.Size = UDim2.new(1, -16, 0, 20)
+	slider.Position = UDim2.fromScale(0.5, 0)
+	slider.Size = UDim2.new(1, 0, 0, 20)
 	slider.Image = ""
 
 	local sliderBg = Instance.new("Frame")
@@ -1216,16 +1241,24 @@ function Section:AddColor(properties: {[string]: any}?): ()
 
 	local button = Instance.new("ImageButton")
 	button.Parent = self.objects.elements
+	button.AutomaticSize = Enum.AutomaticSize.Y
 	button.AutoButtonColor = false
 	button.BackgroundTransparency = 1
-	button.Size = UDim2.new(1, 0, 0, 22)
+	button.Size = UDim2.new(1, 0, 0, 0)
 	button.Image = ""
+	
+	local uiPadding = Instance.new("UIPadding")
+	uiPadding.Parent = button
+	uiPadding.PaddingLeft = UDim.new(0, 10)
+	uiPadding.PaddingRight = UDim.new(0, 10)
+	uiPadding.PaddingTop = UDim.new(0, 4)
+	uiPadding.PaddingBottom = UDim.new(0, 4)
 
 	local panelRoot = Instance.new("Frame")
 	panelRoot.Parent = button
 	panelRoot.AnchorPoint = Vector2.new(1, 0.5)
 	panelRoot.BackgroundTransparency = 1
-	panelRoot.Position = UDim2.new(1, -8, 0.5, 0)
+	panelRoot.Position = UDim2.fromScale(1, 0.5)
 	panelRoot.Size = UDim2.fromOffset(24, 16)
 
 	local panelBg = Instance.new("Frame")
@@ -1250,16 +1283,18 @@ function Section:AddColor(properties: {[string]: any}?): ()
 
 	local text = Instance.new("TextLabel")
 	text.Parent = button
-	text.AnchorPoint = Vector2.new(0, 0.5)
+	text.AutomaticSize = Enum.AutomaticSize.Y
+	text.AnchorPoint = Vector2.new(0, 0)
 	text.BackgroundTransparency = 1
-	text.Position = UDim2.new(0, 10, 0.5, 0)
-	text.Size = UDim2.new(1, -46, 0, 14)
+	text.Position = UDim2.new()
+	text.Size = UDim2.new(1, -46, 0, 0)
 	text.Font = Enum.Font.Code
 	text.Text = name
 	text.TextColor3 = Theme.Text
 	text.TextSize = 14
 	text.TextXAlignment = Enum.TextXAlignment.Left
-	text.TextTruncate = Enum.TextTruncate.AtEnd
+	text.TextTruncate = Enum.TextTruncate.SplitWord
+	text.RichText = true
 
 	do
 		local _value = defaultValue
@@ -1357,16 +1392,24 @@ function Section:AddButton(properties: {[string]: any}): ()
 
 	local frame = Instance.new("Frame")
 	frame.Parent = self.objects.elements
+	frame.AutomaticSize = Enum.AutomaticSize.Y
 	frame.BackgroundTransparency = 1
-	frame.Size = UDim2.new(1, 0, 0, 34)
+	frame.Size = UDim2.fromScale(1, 0)
+	
+	local uiPadding = Instance.new("UIPadding")
+	uiPadding.Parent = frame
+	uiPadding.PaddingLeft = UDim.new(0, 10)
+	uiPadding.PaddingRight = UDim.new(0, 10)
+	uiPadding.PaddingTop = UDim.new(0, 4)
+	uiPadding.PaddingBottom = UDim.new(0, 4)
 
 	local button = Instance.new("ImageButton")
 	button.Parent = frame
-	button.AnchorPoint = Vector2.new(0.5, 0.5)
+	button.AutomaticSize = Enum.AutomaticSize.Y
 	button.AutoButtonColor = false
 	button.BackgroundTransparency = 1
-	button.Position = UDim2.fromScale(0.5, 0.5)
-	button.Size = UDim2.new(1, -16, 0, 26)
+	button.Position = UDim2.new()
+	button.Size = UDim2.new(1, 0, 0, 0)
 	button.Image = ""
 
 	local buttonBg = Instance.new("Frame")
@@ -1383,15 +1426,24 @@ function Section:AddButton(properties: {[string]: any}): ()
 
 	local text = Instance.new("TextLabel")
 	text.Parent = button
+	text.AutomaticSize = Enum.AutomaticSize.Y
 	text.BackgroundTransparency = 1
-	text.Size = UDim2.fromScale(1, 1)
+	text.Size = UDim2.fromScale(1, 0)
 	text.Font = Enum.Font.Code
 	text.Font = Enum.Font.Code
 	text.Text = name
 	text.TextColor3 = Theme.ButtonText
 	text.TextSize = 14
 	text.TextXAlignment = Enum.TextXAlignment.Center
-	text.TextTruncate = Enum.TextTruncate.AtEnd
+	text.TextTruncate = Enum.TextTruncate.SplitWord
+	text.RichText = true
+	
+	local uiPadding = Instance.new("UIPadding")
+	uiPadding.Parent = text
+	uiPadding.PaddingLeft = UDim.new(0, 4)
+	uiPadding.PaddingRight = UDim.new(0, 4)
+	uiPadding.PaddingTop = UDim.new(0, 6)
+	uiPadding.PaddingBottom = UDim.new(0, 6)
 
 	do
 		local function onActivated()
@@ -1459,29 +1511,45 @@ function Section:AddKeybind(properties: {[string]: any}): ()
 
 	local frame = Instance.new("Frame")
 	frame.Parent = self.objects.elements
+	frame.AutomaticSize = Enum.AutomaticSize.Y
 	frame.BackgroundTransparency = 1
-	frame.Size = UDim2.new(1, 0, 0, 54)
+	frame.Size = UDim2.fromScale(1, 0)
+	
+	local uiPadding = Instance.new("UIPadding")
+	uiPadding.Parent = frame
+	uiPadding.PaddingLeft = UDim.new(0, 10)
+	uiPadding.PaddingRight = UDim.new(0, 10)
+	uiPadding.PaddingTop = UDim.new(0, 4)
+	uiPadding.PaddingBottom = UDim.new(0, 4)
+	
+	local uiList = Instance.new("UIListLayout")
+	uiList.Parent = frame
+	uiList.FillDirection = Enum.FillDirection.Vertical
+	uiList.SortOrder = Enum.SortOrder.LayoutOrder
+	uiList.Padding = UDim.new(0, 4)
 
 	local text = Instance.new("TextLabel")
 	text.Parent = frame
+	text.AutomaticSize = Enum.AutomaticSize.Y
 	text.AnchorPoint = Vector2.new(1, 0)
 	text.BackgroundTransparency = 1
-	text.Position = UDim2.new(1, 0, 0, 4)
-	text.Size = UDim2.new(1, -10, 0, 14)
+	text.Position = UDim2.new()
+	text.Size = UDim2.fromScale(1, 0)
 	text.Font = Enum.Font.Code
 	text.Text = name
 	text.TextColor3 = Theme.Text
 	text.TextSize = 14
-	text.TextTruncate = Enum.TextTruncate.AtEnd
+	text.TextTruncate = Enum.TextTruncate.SplitWord
 	text.TextXAlignment = Enum.TextXAlignment.Left
+	text.RichText = true
 
 	local button = Instance.new("ImageButton")
 	button.Parent = frame
-	button.AnchorPoint = Vector2.new(0.5, 0)
+	button.AutomaticSize = Enum.AutomaticSize.Y
 	button.AutoButtonColor = false
 	button.BackgroundTransparency = 1
-	button.Position = UDim2.new(0.5, 0, 0, 24)
-	button.Size = UDim2.new(1, -16, 0, 26)
+	button.Position = UDim2.new()
+	button.Size = UDim2.new(1, 0, 0, 0)
 	button.Image = ""
 
 	local buttonBg = Instance.new("Frame")
@@ -1498,15 +1566,23 @@ function Section:AddKeybind(properties: {[string]: any}): ()
 
 	local buttonText = Instance.new("TextLabel")
 	buttonText.Parent = button
+	buttonText.AutomaticSize = Enum.AutomaticSize.Y
 	buttonText.BackgroundTransparency = 1
-	buttonText.Size = UDim2.fromScale(1, 1)
+	buttonText.Size = UDim2.fromScale(1, 0)
 	buttonText.Font = Enum.Font.Code
 	buttonText.Font = Enum.Font.Code
-	buttonText.Text = name
+	buttonText.Text = ""
 	buttonText.TextColor3 = Theme.ButtonText
 	buttonText.TextSize = 14
 	buttonText.TextXAlignment = Enum.TextXAlignment.Center
-	buttonText.TextTruncate = Enum.TextTruncate.AtEnd
+	buttonText.TextTruncate = Enum.TextTruncate.SplitWord
+	
+	local uiPadding = Instance.new("UIPadding")
+	uiPadding.Parent = buttonText
+	uiPadding.PaddingLeft = UDim.new(0, 4)
+	uiPadding.PaddingRight = UDim.new(0, 4)
+	uiPadding.PaddingTop = UDim.new(0, 6)
+	uiPadding.PaddingBottom = UDim.new(0, 6)
 
 	do -- 実装
 		local _value = defaultValue
@@ -1598,6 +1674,41 @@ function Section:AddKeybind(properties: {[string]: any}): ()
 		AddConnection(button.InputBegan, onInputBegan)
 		AddConnection(button.InputEnded, onInputEnded)
 	end
+end
+
+function Section:AddTextLabel(properties: {[string]: any}): ()
+	local text = properties.Text
+	local alignment = properties.Alignment or Enum.TextXAlignment.Left
+	local wrapped = properties.Wrapped or false
+	
+	local frame = Instance.new("Frame")
+	frame.Parent = self.objects.elements
+	frame.AutomaticSize = Enum.AutomaticSize.Y
+	frame.BackgroundTransparency = 1
+	frame.Position = UDim2.new()
+	frame.Size = UDim2.fromScale(1, 0)
+	
+	local uiPadding = Instance.new("UIPadding")
+	uiPadding.Parent = frame
+	uiPadding.PaddingLeft = UDim.new(0, 10)
+	uiPadding.PaddingRight = UDim.new(0, 10)
+	uiPadding.PaddingTop = UDim.new(0, 4)
+	uiPadding.PaddingBottom = UDim.new(0, 4)
+	
+	local label = Instance.new("TextLabel")
+	label.Parent = frame
+	label.AutomaticSize = Enum.AutomaticSize.Y
+	label.BackgroundTransparency = 1
+	label.Position = UDim2.new()
+	label.Size = UDim2.fromScale(1, 0)
+	label.Font = Enum.Font.Code
+	label.Text = text
+	label.TextColor3 = Theme.Text
+	label.TextSize = 14
+	label.TextTruncate = Enum.TextTruncate.SplitWord
+	label.TextXAlignment = alignment
+	label.TextWrapped = wrapped
+	label.RichText = true
 end
 
 return UILibrary
