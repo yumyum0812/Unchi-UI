@@ -1,4 +1,4 @@
-local UILibrary = {}
+local Library = {}
 
 -- サービス
 local Players = game:GetService("Players")
@@ -25,6 +25,8 @@ local Theme = {
 	ButtonText = Color3.fromRGB(185, 185, 185),
 	ButtonBackground = Color3.fromRGB(68, 68, 68),
 }
+
+Library.Theme = Theme
 
 -- 変数
 local gui = nil
@@ -156,7 +158,7 @@ local function AddBorderFrame(object: GuiBase, color: Color3, thickness: number,
 	return uiStroke
 end
 
-function UILibrary:Destroy(): ()
+function Library:Destroy(): ()
 	ClearConnections()
 
 	windows = {}
@@ -165,7 +167,7 @@ function UILibrary:Destroy(): ()
 	gui = nil
 end
 
-function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)	
+function Library:CreateWindow(properties: {[string]: any}?): typeof(Window)	
 	local name = properties.Name
 	local width = properties.Width or 450
 	local height = properties.Height or 540
@@ -1711,4 +1713,4 @@ function Section:AddTextLabel(properties: {[string]: any}): ()
 	label.RichText = true
 end
 
-return UILibrary
+return Library
