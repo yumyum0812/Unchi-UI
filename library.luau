@@ -52,7 +52,7 @@ local function GetHiddenGui(): ()
 	return wrapped()
 end
 
-local function TryProtectGui(gui: ScreenGui): ()
+local function ProtectGui(gui: ScreenGui): ()
 	local env = getfenv()
 	local syn = env.syn
 	if syn and syn.protect_gui then
@@ -75,7 +75,7 @@ do
 	if not success then
 		gui.Parent = Players.LocalPlayer.PlayerGui
 	end
-	TryProtectGui(gui)
+	ProtectGui(gui)
 end
 
 local function AddConnection(signal: RBXScriptSignal, callback: (any...) -> any...): ()
@@ -157,9 +157,7 @@ end
 
 function Library:Destroy(): ()
 	ClearConnections()
-
 	windows = {}
-
 	gui:Destroy()
 	gui = nil
 end
@@ -185,12 +183,12 @@ function Library:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	local background = Instance.new("Frame")
 	background.Parent = root
 	background.BackgroundColor3 = Library.Colors.WindowBackground
-	background.BorderSizePixel = 0
 	background.BorderColor3 = Library.Colors.WindowOuterBorder
 	background.BorderMode = Enum.BorderMode.Inset
 	background.BorderSizePixel = 1
 	background.Size = UDim2.fromScale(1, 1)
 
+	AddBorderFrame(root, Library.Colors.WindowOuterBorder, 1, -1)
 	AddBorderFrame(root, Library.Colors.WindowInnerBorder, 1, -2)
 
 	local handle = Instance.new("ImageButton")
@@ -245,38 +243,30 @@ function Library:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	uiList.FillDirection = Enum.FillDirection.Horizontal
 	uiList.SortOrder = Enum.SortOrder.LayoutOrder
 
-	local tabSections = Instance.new("Frame")
-	tabSections.Parent = root
-	tabSections.AnchorPoint = Vector2.new(0.5, 1)
-	tabSections.BackgroundTransparency = 1
-	tabSections.Position = UDim2.new(0.5, 0, 1, -6)
-	tabSections.Size = UDim2.new(1, -12, 1, -66)
-
+	local tabSectionsRoot = Instance.new("Frame")
+	tabSectionsRoot.Parent = root
+	tabSectionsRoot.AnchorPoint = Vector2.new(0.5, 1)
+	tabSectionsRoot.BackgroundTransparency = 1
+	tabSectionsRoot.Position = UDim2.new(0.5, 0, 1, -6)
+	tabSectionsRoot.Size = UDim2.new(1, -12, 1, -66)
+	
 	local tabSectionsBg = Instance.new("Frame")
-	tabSectionsBg.Parent = tabSections
+	tabSectionsBg.Parent = tabSectionsRoot
 	tabSectionsBg.BackgroundColor3 = Library.Colors.TabBackground
-	tabSectionsBg.Size = UDim2.fromScale(1, 1)
 	tabSectionsBg.BorderColor3 = Library.Colors.TabOuterBorder
 	tabSectionsBg.BorderMode = Enum.BorderMode.Inset
 	tabSectionsBg.BorderSizePixel = 1
-
-	do
-		local outline = Instance.new("Frame")
-		outline.Parent = tabSections
-		outline.BackgroundTransparency = 1
-		outline.AnchorPoint = Vector2.new(0.5, 0.5)
-		outline.Position = UDim2.fromScale(0.5, 0.5)
-		outline.Size = UDim2.new(1, -4, 1, -4)
-
-		local stroke = Instance.new("UIStroke")
-		stroke.Parent = outline
-		stroke.Enabled = true
-		stroke.Color = Library.Colors.TabInnerBorder
-		stroke.Thickness = 1
-		stroke.LineJoinMode = Enum.LineJoinMode.Miter
-		stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	end
-
+	tabSectionsBg.Size = UDim2.fromScale(1, 1)
+	
+	AddBorderFrame(tabSectionsRoot, Library.Colors.TabInnerBorder, 1, -2)
+	
+	local tabSections = Instance.new("Frame")
+	tabSections.Parent = tabSectionsRoot
+	tabSections.AnchorPoint = Vector2.new(0.5, 0.5)
+	tabSections.BackgroundTransparency = 1
+	tabSections.Position = UDim2.fromScale(0.5, 0.5)
+	tabSections.Size = UDim2.new(1, -4, 1, -4)
+	
 	window.objects.root = root
 	window.objects.tabs = tabsHolder
 	window.objects.tabSections = tabSections
@@ -655,8 +645,8 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 
 		local uiPadding = Instance.new("UIPadding")
 		uiPadding.Parent = sectionsL
-		uiPadding.PaddingTop = UDim.new(0, 16)
-		uiPadding.PaddingBottom = UDim.new(0, 10)
+		uiPadding.PaddingTop = UDim.new(0, 14)
+		uiPadding.PaddingBottom = UDim.new(0, 8)
 		uiPadding.PaddingLeft = UDim.new(0, 8)
 		uiPadding.PaddingRight = UDim.new(0, 4)
 	end
@@ -679,8 +669,8 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 
 		local uiPadding = Instance.new("UIPadding")
 		uiPadding.Parent = sectionsR
-		uiPadding.PaddingTop = UDim.new(0, 16)
-		uiPadding.PaddingBottom = UDim.new(0, 10)
+		uiPadding.PaddingTop = UDim.new(0, 14)
+		uiPadding.PaddingBottom = UDim.new(0, 8)
 		uiPadding.PaddingLeft = UDim.new(0, 4)
 		uiPadding.PaddingRight = UDim.new(0, 8)
 	end
@@ -1588,7 +1578,16 @@ function Section:AddKeybind(properties: {[string]: any}): ()
 		local _waitForInput = false
 
 		local function updateVisual()
-			buttonText.Text = _value and _value.Name or "---"
+			if _value then
+				local keyName = UserInputService:GetStringForKeyCode(_value.Name)
+				if keyName:match("^%s*$") then
+					keyName = _value.Name
+				end
+				
+				buttonText.Text = keyName
+			else
+				buttonText.Text = ""
+			end
 		end
 		
 		local function onActivated()
