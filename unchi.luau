@@ -206,7 +206,7 @@ function UILibrary:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	title.AnchorPoint = Vector2.new(0.5, 0)
 	title.BackgroundTransparency = 1
 	title.Position = UDim2.new(0.5, 0, 0, 12)
-	title.Size = UDim2.new(1, -28, 0, 14)
+	title.Size = UDim2.new(1, -24, 0, 14)
 	title.Font = Enum.Font.Code
 	title.Text = name
 	title.TextColor3 = Theme.Accent
