@@ -1,10 +1,10 @@
 local Library = {}
 
 Library.Colors = {
-	Accent = Color3.fromRGB(170, 86, 229),
-	Text = Color3.fromRGB(200, 200, 200),
+	Accent = Color3.fromRGB(164, 72, 229),
+	Text = Color3.fromRGB(180, 180, 180),
 	WindowBackground = Color3.fromRGB(40, 40, 40),
-	WindowInnerBorder = Color3.fromRGB(90, 90, 90),
+	WindowInnerBorder = Color3.fromRGB(76, 76, 76),
 	WindowOuterBorder = Color3.fromRGB(14, 14, 14),
 	TabText = Color3.fromRGB(128, 128, 128),
 	TabBackground = Color3.fromRGB(32, 32, 32),
@@ -13,11 +13,11 @@ Library.Colors = {
 	SectionBackground = Color3.fromRGB(40, 40, 40),
 	SectionInnerBorder = Color3.fromRGB(64, 64, 64),
 	SectionOuterBorder = Color3.fromRGB(18, 18, 18),
-	ElementBackground = Color3.fromRGB(50, 50, 50),
+	ElementBackground = Color3.fromRGB(42, 42, 42),
 	ElementInnerBorder = Color3.fromRGB(88, 88, 88),
 	ElementOuterBorder = Color3.fromRGB(20, 20, 20),
-	ButtonText = Color3.fromRGB(200, 200, 200),
-	ButtonBackground = Color3.fromRGB(62, 62, 62),
+	ButtonText = Color3.fromRGB(180, 180, 180),
+	ButtonBackground = Color3.fromRGB(58, 58, 58),
 }
 
 -- サービス
@@ -164,7 +164,7 @@ end
 function Library:CreateWindow(properties: {[string]: any}?): typeof(Window)	
 	local name = properties.Name
 	local width = properties.Width or 460
-	local height = properties.Height or 560
+	local height = properties.Height or 540
 	local position = properties.Position or UDim2.fromScale(0.5, 0.5)
 
 	local window = setmetatable({}, Window)
@@ -202,7 +202,7 @@ function Library:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	title.AnchorPoint = Vector2.new(0.5, 0)
 	title.BackgroundTransparency = 1
 	title.Position = UDim2.new(0.5, 0, 0, 10)
-	title.Size = UDim2.new(1, -24, 0, 14)
+	title.Size = UDim2.new(1, -20, 0, 14)
 	title.Font = Enum.Font.Code
 	title.Text = name
 	title.TextColor3 = Library.Colors.Accent
@@ -216,8 +216,8 @@ function Library:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	tabs.AutomaticCanvasSize = Enum.AutomaticSize.X
 	tabs.AnchorPoint = Vector2.new(0.5, 0)
 	tabs.BackgroundTransparency = 1
-	tabs.Position = UDim2.new(0.5, 0, 0, 28)
-	tabs.Size = UDim2.new(1, -12, 0, 29)
+	tabs.Position = UDim2.new(0.5, 0, 0, 26)
+	tabs.Size = UDim2.new(1, -12, 0, 31)
 	tabs.ScrollBarThickness = 0
 	tabs.ScrollingDirection = Enum.ScrollingDirection.X
 	tabs.CanvasSize = UDim2.new()
@@ -231,7 +231,7 @@ function Library:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	do
 		local uiList = Instance.new("UIListLayout")
 		uiList.Parent = tabsHolder
-		uiList.Padding = UDim.new(0, 0)
+		uiList.Padding = UDim.new(0, 2)
 		uiList.FillDirection = Enum.FillDirection.Horizontal
 		uiList.SortOrder = Enum.SortOrder.LayoutOrder
 	end
@@ -618,8 +618,8 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = button
-	uiPadding.PaddingLeft = UDim.new(0, 8)
-	uiPadding.PaddingRight = UDim.new(0, 8)
+	uiPadding.PaddingLeft = UDim.new(0, 6)
+	uiPadding.PaddingRight = UDim.new(0, 6)
 
 	local sections = Instance.new("Frame")
 	sections.Parent = self.objects.tabSections
@@ -829,7 +829,7 @@ function Tab:CreateSection(properties: {[string]: any}): typeof(Section)
 
 	local fill = Instance.new("Frame")
 	fill.Parent = textSpace
-	fill.BackgroundColor3 = Library.Colors.SectionBackground
+	fill.BackgroundColor3 = Library.Colors.TabBackground
 	fill.BorderSizePixel = 0
 	fill.Position = UDim2.fromOffset(0, 0)
 	fill.Size = UDim2.new(1, 0, 0, 2)
@@ -860,8 +860,8 @@ function Tab:CreateSection(properties: {[string]: any}): typeof(Section)
 
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = elements
-	uiPadding.PaddingTop = UDim.new(0, 8)
-	uiPadding.PaddingBottom = UDim.new(0, 6)
+	uiPadding.PaddingTop = UDim.new(0, 6)
+	uiPadding.PaddingBottom = UDim.new(0, 4)
 
 	local uiList = Instance.new("UIListLayout")
 	uiList.Parent = elements
@@ -888,8 +888,8 @@ function Section:AddToggle(properties: {[string]: any}?): ()
 	
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = button
-	uiPadding.PaddingLeft = UDim.new(0, 10)
-	uiPadding.PaddingRight = UDim.new(0, 10)
+	uiPadding.PaddingLeft = UDim.new(0, 8)
+	uiPadding.PaddingRight = UDim.new(0, 8)
 	uiPadding.PaddingTop = UDim.new(0, 4)
 	uiPadding.PaddingBottom = UDim.new(0, 4)
 
@@ -1048,8 +1048,8 @@ function Section:AddSlider(properties: {[string]: any}?): ()
 	
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = frame
-	uiPadding.PaddingLeft = UDim.new(0, 10)
-	uiPadding.PaddingRight = UDim.new(0, 10)
+	uiPadding.PaddingLeft = UDim.new(0, 8)
+	uiPadding.PaddingRight = UDim.new(0, 8)
 	uiPadding.PaddingTop = UDim.new(0, 4)
 	uiPadding.PaddingBottom = UDim.new(0, 4)
 
@@ -1239,8 +1239,8 @@ function Section:AddColor(properties: {[string]: any}?): ()
 	
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = button
-	uiPadding.PaddingLeft = UDim.new(0, 10)
-	uiPadding.PaddingRight = UDim.new(0, 10)
+	uiPadding.PaddingLeft = UDim.new(0, 8)
+	uiPadding.PaddingRight = UDim.new(0, 8)
 	uiPadding.PaddingTop = UDim.new(0, 4)
 	uiPadding.PaddingBottom = UDim.new(0, 4)
 
@@ -1249,7 +1249,7 @@ function Section:AddColor(properties: {[string]: any}?): ()
 	panelRoot.AnchorPoint = Vector2.new(1, 0.5)
 	panelRoot.BackgroundTransparency = 1
 	panelRoot.Position = UDim2.fromScale(1, 0.5)
-	panelRoot.Size = UDim2.fromOffset(24, 16)
+	panelRoot.Size = UDim2.fromOffset(24, 14)
 
 	local panelBg = Instance.new("Frame")
 	panelBg.Parent = panelRoot
@@ -1388,8 +1388,8 @@ function Section:AddButton(properties: {[string]: any}): ()
 	
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = frame
-	uiPadding.PaddingLeft = UDim.new(0, 10)
-	uiPadding.PaddingRight = UDim.new(0, 10)
+	uiPadding.PaddingLeft = UDim.new(0, 8)
+	uiPadding.PaddingRight = UDim.new(0, 8)
 	uiPadding.PaddingTop = UDim.new(0, 4)
 	uiPadding.PaddingBottom = UDim.new(0, 4)
 
@@ -1507,8 +1507,8 @@ function Section:AddKeybind(properties: {[string]: any}): ()
 	
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = frame
-	uiPadding.PaddingLeft = UDim.new(0, 10)
-	uiPadding.PaddingRight = UDim.new(0, 10)
+	uiPadding.PaddingLeft = UDim.new(0, 8)
+	uiPadding.PaddingRight = UDim.new(0, 8)
 	uiPadding.PaddingTop = UDim.new(0, 4)
 	uiPadding.PaddingBottom = UDim.new(0, 4)
 	
@@ -1689,8 +1689,8 @@ function Section:AddTextLabel(properties: {[string]: any}): ()
 	
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = frame
-	uiPadding.PaddingLeft = UDim.new(0, 10)
-	uiPadding.PaddingRight = UDim.new(0, 10)
+	uiPadding.PaddingLeft = UDim.new(0, 8)
+	uiPadding.PaddingRight = UDim.new(0, 8)
 	uiPadding.PaddingTop = UDim.new(0, 4)
 	uiPadding.PaddingBottom = UDim.new(0, 4)
 	
