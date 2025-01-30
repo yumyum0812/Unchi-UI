@@ -1,10 +1,10 @@
 local Library = {}
 
 Library.Colors = {
-	Accent = Color3.fromRGB(155, 58, 229),
+	Accent = Color3.fromRGB(170, 86, 229),
 	Text = Color3.fromRGB(200, 200, 200),
 	WindowBackground = Color3.fromRGB(40, 40, 40),
-	WindowInnerBorder = Color3.fromRGB(78, 78, 78),
+	WindowInnerBorder = Color3.fromRGB(90, 90, 90),
 	WindowOuterBorder = Color3.fromRGB(14, 14, 14),
 	TabText = Color3.fromRGB(128, 128, 128),
 	TabBackground = Color3.fromRGB(32, 32, 32),
@@ -13,11 +13,11 @@ Library.Colors = {
 	SectionBackground = Color3.fromRGB(40, 40, 40),
 	SectionInnerBorder = Color3.fromRGB(64, 64, 64),
 	SectionOuterBorder = Color3.fromRGB(18, 18, 18),
-	ElementBackground = Color3.fromRGB(42, 42, 42),
+	ElementBackground = Color3.fromRGB(50, 50, 50),
 	ElementInnerBorder = Color3.fromRGB(88, 88, 88),
 	ElementOuterBorder = Color3.fromRGB(20, 20, 20),
 	ButtonText = Color3.fromRGB(200, 200, 200),
-	ButtonBackground = Color3.fromRGB(58, 58, 58),
+	ButtonBackground = Color3.fromRGB(62, 62, 62),
 }
 
 -- サービス
@@ -39,7 +39,6 @@ Tab.__index = Tab
 
 local Window = {}
 Window.__index = Window
-
 --
 
 local function GetCoreGui(): ()
@@ -202,7 +201,7 @@ function Library:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	title.Parent = root
 	title.AnchorPoint = Vector2.new(0.5, 0)
 	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0.5, 0, 0, 12)
+	title.Position = UDim2.new(0.5, 0, 0, 10)
 	title.Size = UDim2.new(1, -24, 0, 14)
 	title.Font = Enum.Font.Code
 	title.Text = name
@@ -214,20 +213,28 @@ function Library:CreateWindow(properties: {[string]: any}?): typeof(Window)
 
 	local tabs = Instance.new("ScrollingFrame")
 	tabs.Parent = root
+	tabs.AutomaticCanvasSize = Enum.AutomaticSize.X
 	tabs.AnchorPoint = Vector2.new(0.5, 0)
 	tabs.BackgroundTransparency = 1
-	tabs.Position = UDim2.new(0.5, 0, 0, 31)
-	tabs.Size = UDim2.new(1, -12, 0, 30)
+	tabs.Position = UDim2.new(0.5, 0, 0, 28)
+	tabs.Size = UDim2.new(1, -12, 0, 29)
 	tabs.ScrollBarThickness = 0
 	tabs.ScrollingDirection = Enum.ScrollingDirection.X
 	tabs.CanvasSize = UDim2.new()
-	tabs.AutomaticCanvasSize = Enum.AutomaticSize.X
 
 	local tabsHolder = Instance.new("Frame")
 	tabsHolder.Parent = tabs
 	tabsHolder.AutomaticSize = Enum.AutomaticSize.X
 	tabsHolder.BackgroundTransparency = 1
 	tabsHolder.Size = UDim2.new(0, 0, 1, -1)
+	
+	do
+		local uiList = Instance.new("UIListLayout")
+		uiList.Parent = tabsHolder
+		uiList.Padding = UDim.new(0, 0)
+		uiList.FillDirection = Enum.FillDirection.Horizontal
+		uiList.SortOrder = Enum.SortOrder.LayoutOrder
+	end
 
 	local tabLine = Instance.new("Frame")
 	tabLine.Parent = tabs
@@ -237,18 +244,12 @@ function Library:CreateWindow(properties: {[string]: any}?): typeof(Window)
 	tabLine.Position = UDim2.new()
 	tabLine.Size = UDim2.new()
 
-	local uiList = Instance.new("UIListLayout")
-	uiList.Parent = tabsHolder
-	uiList.Padding = UDim.new(0, 0)
-	uiList.FillDirection = Enum.FillDirection.Horizontal
-	uiList.SortOrder = Enum.SortOrder.LayoutOrder
-
 	local tabSectionsRoot = Instance.new("Frame")
 	tabSectionsRoot.Parent = root
 	tabSectionsRoot.AnchorPoint = Vector2.new(0.5, 1)
 	tabSectionsRoot.BackgroundTransparency = 1
 	tabSectionsRoot.Position = UDim2.new(0.5, 0, 1, -6)
-	tabSectionsRoot.Size = UDim2.new(1, -12, 1, -66)
+	tabSectionsRoot.Size = UDim2.new(1, -12, 1, -62)
 	
 	local tabSectionsBg = Instance.new("Frame")
 	tabSectionsBg.Parent = tabSectionsRoot
@@ -617,8 +618,8 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = button
-	uiPadding.PaddingLeft = UDim.new(0, 10)
-	uiPadding.PaddingRight = UDim.new(0, 10)
+	uiPadding.PaddingLeft = UDim.new(0, 8)
+	uiPadding.PaddingRight = UDim.new(0, 8)
 
 	local sections = Instance.new("Frame")
 	sections.Parent = self.objects.tabSections
@@ -837,7 +838,7 @@ function Tab:CreateSection(properties: {[string]: any}): typeof(Section)
 	text.Parent = textSpace
 	text.AutomaticSize = Enum.AutomaticSize.X
 	text.BackgroundTransparency = 1
-	text.Position = UDim2.fromOffset(0, -8)
+	text.Position = UDim2.fromOffset(0, -9)
 	text.Size = UDim2.fromOffset(0, 14)
 	text.Font = Enum.Font.Code
 	text.Text = name
