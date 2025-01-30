@@ -1,23 +1,23 @@
 local Library = {}
 
 Library.Colors = {
-	Accent = Color3.fromRGB(168, 62, 244),
-	Text = Color3.fromRGB(214, 214, 214),
-	WindowBackground = Color3.fromRGB(38, 38, 38),
-	WindowInnerBorder = Color3.fromRGB(75, 75, 75),
-	WindowOuterBorder = Color3.fromRGB(20, 20, 20),
+	Accent = Color3.fromRGB(155, 58, 229),
+	Text = Color3.fromRGB(200, 200, 200),
+	WindowBackground = Color3.fromRGB(40, 40, 40),
+	WindowInnerBorder = Color3.fromRGB(78, 78, 78),
+	WindowOuterBorder = Color3.fromRGB(14, 14, 14),
 	TabText = Color3.fromRGB(128, 128, 128),
-	TabBackground = Color3.fromRGB(34, 34, 34),
-	TabInnerBorder = Color3.fromRGB(22, 22, 22),
+	TabBackground = Color3.fromRGB(32, 32, 32),
+	TabInnerBorder = Color3.fromRGB(18, 18, 18),
 	TabOuterBorder = Color3.fromRGB(70, 70, 70),
-	SectionBackground = Color3.fromRGB(44, 44, 44),
-	SectionInnerBorder = Color3.fromRGB(63, 63, 63),
-	SectionOuterBorder = Color3.fromRGB(26, 26, 26),
-	ElementBackground = Color3.fromRGB(50, 50, 50),
+	SectionBackground = Color3.fromRGB(40, 40, 40),
+	SectionInnerBorder = Color3.fromRGB(64, 64, 64),
+	SectionOuterBorder = Color3.fromRGB(18, 18, 18),
+	ElementBackground = Color3.fromRGB(42, 42, 42),
 	ElementInnerBorder = Color3.fromRGB(88, 88, 88),
-	ElementOuterBorder = Color3.fromRGB(32, 32, 32),
-	ButtonText = Color3.fromRGB(185, 185, 185),
-	ButtonBackground = Color3.fromRGB(68, 68, 68),
+	ElementOuterBorder = Color3.fromRGB(20, 20, 20),
+	ButtonText = Color3.fromRGB(200, 200, 200),
+	ButtonBackground = Color3.fromRGB(58, 58, 58),
 }
 
 -- サービス
@@ -164,8 +164,8 @@ end
 
 function Library:CreateWindow(properties: {[string]: any}?): typeof(Window)	
 	local name = properties.Name
-	local width = properties.Width or 450
-	local height = properties.Height or 540
+	local width = properties.Width or 460
+	local height = properties.Height or 560
 	local position = properties.Position or UDim2.fromScale(0.5, 0.5)
 
 	local window = setmetatable({}, Window)
@@ -617,8 +617,8 @@ function Window:CreateTab(properties: {[string]: any}): typeof(Tab)
 
 	local uiPadding = Instance.new("UIPadding")
 	uiPadding.Parent = button
-	uiPadding.PaddingLeft = UDim.new(0, 16)
-	uiPadding.PaddingRight = UDim.new(0, 16)
+	uiPadding.PaddingLeft = UDim.new(0, 10)
+	uiPadding.PaddingRight = UDim.new(0, 10)
 
 	local sections = Instance.new("Frame")
 	sections.Parent = self.objects.tabSections
